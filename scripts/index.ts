@@ -42,6 +42,15 @@ async function main() {
 
 	const sphere = Mesh.sphere(gl, program, 2, 16, { R: 1.0, G: 0.5, B: 0.0, A: 1.0 })
 
+	const onResize = () => {
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+
+		gl.viewport(0, 0, window.innerWidth, window.innerHeight);
+	}
+
+	onResize();
+
 	let previous = performance.now();
 	const render = (now: number) => {
 		let dt = (now - previous) / 1000;
@@ -49,6 +58,7 @@ async function main() {
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+		// TODO: fix aspect ratio among other things
 		let model = Mat4.identity();
 		set_uniform_matrix4(gl, program, "modelview", model.data);
 
@@ -57,6 +67,8 @@ async function main() {
 		window.requestAnimationFrame(render);
 	}
 
+
+	window.addEventListener("resize", onResize)
 	window.requestAnimationFrame(render);
 }
 
