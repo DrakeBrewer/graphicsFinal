@@ -131,7 +131,7 @@ export function set_vertex_attrib_to_buffer(
  */
 export function set_render_params(gl: WebGLRenderingContext, bg_color: Color) {
 	// gl.clearColor( 0.0, 0.0, 0.0, 1 );
-	gl.clearColor(bg_color.red, bg_color.green, bg_color.blue, 1.0);
+	gl.clearColor(bg_color.r, bg_color.g, bg_color.b, 1.0);
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	gl.enable(gl.DEPTH_TEST);

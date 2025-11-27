@@ -1,5 +1,6 @@
 export interface Color {
-	red: number;
-	green: number;
-	blue: number;
+	r: number;
+	g: number;
+	b: number;
+	a: number;
 };
