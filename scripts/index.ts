@@ -1,8 +1,13 @@
 import Camera, { Controls } from "./camera";
-import { Mesh, UvMesh, type Material } from "./mesh";
+import { UvMesh, type Material } from "./mesh";
 import Node from "./sceneGraph";
 import { Texture } from "./texture";
 import type { Color } from "./types";
+import {
+	DESIRED_MSPT,
+	FLY_SPEED_PER_FRAME,
+	ROTATION_SPEED_PER_FRAME
+} from "./utils/constants";
 import Mat4 from "./utils/matrix";
 import {
 	set_render_params,
@@ -56,20 +61,21 @@ async function main() {
 	const camera = new Camera();
 	camera.translate(0, 0, -10);
 
-	const onResize = () => {
-		canvas.width = window.innerWidth;
-		canvas.height = window.innerHeight;
-
-		gl.viewport(0, 0, window.innerWidth, window.innerHeight);
-	}
-
-	onResize();
-
 	const perspective = {
 		fov: 0.25,
 		aspectRatio: canvas.width / canvas.height,
 		plane: { near: 0.1, far: 100 },
 	}
+
+	const onResize = () => {
+		canvas.width = window.innerWidth;
+		canvas.height = window.innerHeight;
+		perspective.aspectRatio = canvas.width / canvas.height;
+
+		gl.viewport(0, 0, window.innerWidth, window.innerHeight);
+	}
+
+	onResize();
 
 	let previous = performance.now();
 	const render = (now: number) => {
@@ -88,25 +94,50 @@ async function main() {
 		const model = Mat4.identity();
 		const view = camera.get_view_matrix();
 
-		set_uniform_matrix4(gl, program, 'projection', projection.data)
-		set_uniform_matrix4(gl, program, 'view', view.data)
-		set_uniform_matrix4(gl, program, 'model', model.data)
+		set_uniform_matrix4(gl, program, 'projection', projection.data);
+		set_uniform_matrix4(gl, program, 'view', view.data);
+		set_uniform_matrix4(gl, program, 'model', model.data);
 
-		set_uniform3fv(gl, program, 'sun.direction', [1.0, 0.0, 0.0])
-		set_uniform3fv(gl, program, 'sun.color', [1.0, 1.0, 1.0])
-		set_uniform3fv(gl, program, 'point_light.position', [-5.0, -5.0, -2.0])
-		set_uniform3fv(gl, program, 'point_light.color', [1.0, 0.0, 0.0])
+		set_uniform3fv(gl, program, 'sun.direction', [1.0, 0.0, 0.0]);
+		set_uniform3fv(gl, program, 'sun.color', [1.0, 1.0, 1.0]);
+		set_uniform3fv(gl, program, 'point_light.position', [-5.0, -5.0, -2.0]);
+		set_uniform3fv(gl, program, 'point_light.color', [1.0, 0.0, 0.0]);
 
-		set_uniform3fv(gl, program, 'cam_pos', Object.values(camera.position))
+		set_uniform3fv(gl, program, 'cam_pos', Object.values(camera.position));
 
 		sphere.render(gl);
 
 		window.requestAnimationFrame(render);
 	}
 
+	const keymap = new Map<string, (() => void)>([
+		['KeyW', () => { camera.move_in_direction(0, 0, FLY_SPEED_PER_FRAME) }],
+		['KeyA', () => { camera.move_in_direction(-FLY_SPEED_PER_FRAME, 0, 0) }],
+		['KeyS', () => { camera.move_in_direction(0, 0, -FLY_SPEED_PER_FRAME) }],
+		['KeyD', () => { camera.move_in_direction(FLY_SPEED_PER_FRAME, 0, 0) }],
+
+		['Space', () => { camera.translate(0, FLY_SPEED_PER_FRAME, 0) }],
+		['KeyC', () => { camera.translate(0, -FLY_SPEED_PER_FRAME, 0) }],
+
+		['ArrowUp', () => { camera.add_pitch(-ROTATION_SPEED_PER_FRAME) }],
+		['ArrowDown', () => { camera.add_pitch(ROTATION_SPEED_PER_FRAME) }],
+		['ArrowLeft', () => { camera.add_yaw(-ROTATION_SPEED_PER_FRAME) }],
+		['ArrowRight', () => { camera.add_yaw(ROTATION_SPEED_PER_FRAME) }],
+	]);
+
+	const update = () => {
+		for (let key of controls.keys_down_list()) {
+			let func = keymap.get(key);
+			if (func !== undefined) {
+				func();
+			}
+		}
+	}
+
 
 	window.addEventListener("resize", onResize)
 	window.requestAnimationFrame(render);
+	setInterval(update, DESIRED_MSPT);
 }
 
 main()

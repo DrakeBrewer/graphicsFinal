@@ -129,10 +129,10 @@ class Camera {
 	}
 
 	move_in_direction(strafe: number, up: number, forward: number) {
-		let matrix = Camera.get_dir_matrix(this.roll, this.pitch, this.yaw);
-		let txed = matrix.transform_vec(new Vec4(strafe, up, forward, 0));
+		const matrix = Camera.get_dir_matrix(this.roll, this.pitch, this.yaw);
+		const txed = matrix.transform_vec(new Vec4(strafe, up, forward, 0));
 
-		// console.log( txed.x, txed.y, txed.z, txed.w );
+		// console.log(txed.x, txed.y, txed.z, txed.w);
 
 		this.translate_vec(txed);
 	}
