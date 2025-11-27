@@ -7,7 +7,7 @@ import {
 } from "./utils/webGl.ts"
 import { Texture } from "./texture";
 
-const VERTEX_STRIDE = 36;
+const VERTEX_STRIDE = 48;
 
 
 export interface Material {
@@ -266,26 +266,26 @@ export class Mesh {
 			28,
 		);
 
-		// set_vertex_attrib_to_buffer(
-		// 	gl,
-		// 	this.program,
-		// 	"normal",
-		// 	this.verts,
-		// 	3,
-		// 	gl.FLOAT,
-		// 	false,
-		// 	VERTEX_STRIDE,
-		// 	36,  // offset: 12 (pos) + 16 (color) + 8 (uv) = 36
-		// );
+		set_vertex_attrib_to_buffer(
+			gl,
+			this.program,
+			"normal",
+			this.verts,
+			3,
+			gl.FLOAT,
+			false,
+			VERTEX_STRIDE,
+			36,  // offset: 12 (pos) + 16 (color) + 8 (uv) = 36
+		);
 
 		const sampler_loc = gl.getUniformLocation(this.program, 'tex_0');
 		gl.uniform1i(sampler_loc, 0);
-		// gl.bindTexture(gl.TEXTURE_2D, this.texture);
+		gl.bindTexture(gl.TEXTURE_2D, this.texture);
 
-		// set_uniform_scalar(gl, this.program, "mat_ambient", this.materials.ambient);
-		// set_uniform_scalar(gl, this.program, "mat_diffuse", this.materials.diffuse);
-		// set_uniform_scalar(gl, this.program, "mat_specular", this.materials.specular);
-		// set_uniform_scalar(gl, this.program, "mat_shininess", this.materials.shininess);
+		set_uniform_scalar(gl, this.program, "mat_ambient", this.materials.ambient);
+		set_uniform_scalar(gl, this.program, "mat_diffuse", this.materials.diffuse);
+		set_uniform_scalar(gl, this.program, "mat_specular", this.materials.specular);
+		set_uniform_scalar(gl, this.program, "mat_shininess", this.materials.shininess);
 
 		gl.drawElements(gl.TRIANGLES, this.n_indis, gl.UNSIGNED_SHORT, 0);
 	}

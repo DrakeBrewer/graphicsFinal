@@ -20,9 +20,10 @@ async function main() {
 	}
 
 	const render_bg: Color = {
-		red: 0.5,
-		green: 0.5,
-		blue: 0.5,
+		r: 0.5,
+		g: 0.5,
+		b: 0.5,
+		a: 1.0
 	}
 	set_render_params(gl, render_bg);
 
