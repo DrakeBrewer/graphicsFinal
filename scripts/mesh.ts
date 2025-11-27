@@ -10,7 +10,6 @@ import type { Color } from "./types.ts";
 
 const VERTEX_STRIDE = 48;
 
-
 export interface Material {
 	ambient: number;
 	diffuse: number;
