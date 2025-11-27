@@ -1,11 +1,14 @@
-import { Mesh } from "./mesh";
+import Camera, { Controls } from "./camera";
+import { Mesh, UvMesh, type Material } from "./mesh";
 import Node from "./sceneGraph";
+import { Texture } from "./texture";
 import type { Color } from "./types";
 import Mat4 from "./utils/matrix";
 import {
 	set_render_params,
 	create_compile_and_link_program,
-	set_uniform_matrix4
+	set_uniform_matrix4,
+	set_uniform3fv
 } from "./utils/webGl";
 
 const canvas = document.getElementById("mainCanvas") as HTMLCanvasElement;
@@ -41,7 +44,17 @@ async function main() {
 	// sun.add_child(earth);
 	// earth.add_child(moon);
 
-	const sphere = Mesh.sphere(gl, program, 2, 16, { R: 1.0, G: 0.5, B: 0.0, A: 1.0 })
+	const texture = new Texture(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR);
+	const material: Material = { ambient: 0.25, diffuse: 1.0, specular: 2.0, shininess: 4.0 };
+	const sphere = UvMesh.sphere(
+		gl, program, 16.0, 16,
+		{ r: 1.0, g: 1.0, b: 1.0, a: 1.0 },
+		texture, material
+	);
+
+	const controls = Controls.start_listening();
+	const camera = new Camera();
+	camera.translate(0, 0, -10);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -52,6 +65,12 @@ async function main() {
 
 	onResize();
 
+	const perspective = {
+		fov: 0.25,
+		aspectRatio: canvas.width / canvas.height,
+		plane: { near: 0.1, far: 100 },
+	}
+
 	let previous = performance.now();
 	const render = (now: number) => {
 		let dt = (now - previous) / 1000;
@@ -59,11 +78,28 @@ async function main() {
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-		// TODO: fix aspect ratio among other things
-		let model = Mat4.identity();
-		set_uniform_matrix4(gl, program, "modelview", model.data);
+		const projection = Mat4.perspective(
+			perspective.fov,
+			perspective.aspectRatio,
+			perspective.plane.near,
+			perspective.plane.far
+		);
 
-		sphere.render(gl)
+		const model = Mat4.identity();
+		const view = camera.get_view_matrix();
+
+		set_uniform_matrix4(gl, program, 'projection', projection.data)
+		set_uniform_matrix4(gl, program, 'view', view.data)
+		set_uniform_matrix4(gl, program, 'model', model.data)
+
+		set_uniform3fv(gl, program, 'sun.direction', [1.0, 0.0, 0.0])
+		set_uniform3fv(gl, program, 'sun.color', [1.0, 1.0, 1.0])
+		set_uniform3fv(gl, program, 'point_light.position', [-5.0, -5.0, -2.0])
+		set_uniform3fv(gl, program, 'point_light.color', [1.0, 0.0, 0.0])
+
+		set_uniform3fv(gl, program, 'cam_pos', Object.values(camera.position))
+
+		sphere.render(gl);
 
 		window.requestAnimationFrame(render);
 	}
