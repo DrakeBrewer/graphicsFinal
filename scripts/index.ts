@@ -98,6 +98,10 @@ async function main() {
 		let dt = (now - previous) / 1000;
 		previous = now;
 
+		sun.rotation.yaw += 0.05 * dt;
+		earth.rotation.yaw += 0.5 * dt;
+		moon.rotation.roll += 1.0 * dt;
+
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
 		const projection = Mat4.perspective(
