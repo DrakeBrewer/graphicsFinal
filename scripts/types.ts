@@ -4,3 +4,9 @@ export interface Color {
 	b: number;
 	a: number;
 };
+
+export interface Position {
+	x: number;
+	y: number;
+	z: number;
+};
