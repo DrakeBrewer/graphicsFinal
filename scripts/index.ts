@@ -43,10 +43,17 @@ async function main() {
 
 	const grant_texture = new Texture(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR);
 	const cube_texture = new Texture(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR);
+	const metal_texture = new Texture(gl, '../assets/textures/metal_scale.png',gl.LINEAR_MIPMAP_LINEAR);
 
 	const cube_material: Material = {ambient:1.0, diffuse:0.0, specular:2.0,shininess:9.0};
-	const cube_with_textures = UvMesh.texture_box(gl,program, 3,3,3,cube_texture,cube_material);
-	const cube_with_grant = UvMesh.box(gl,program,3,3,3,grant_texture,cube_material);
+	const cube_with_textures_mesh = UvMesh.texture_box(gl,program, 3,3,3,cube_texture,cube_material);
+	const cube_with_grant_mesh = UvMesh.box(gl,program,3,3,3,grant_texture,cube_material);
+
+	const metal_sphere_material: Material = {ambient:0.25, diffuse:1.0, specular: 2.0, shininess: 4.0};
+	const metal_sphere_mesh = UvMesh.sphere(gl,program,8,16,{r:1,g:1,b:1,a:1},metal_texture,metal_sphere_material);
+
+	//const teapot_material: Material = {}
+
 
 	const sun_material: Material = { ambient: 1.0, diffuse: 0.0, specular: 2.0, shininess: 9.0 };
 	const sun_mesh = UvMesh.sphere(
@@ -79,10 +86,13 @@ async function main() {
 
 	const root = new Node();
 	const camera = new Node({ x: 0, y: 0, z: -25 });
-	const texture_cube = new Node({x:-4.5,y:0,z:-10},undefined,undefined,cube_with_textures);
-	const grant_cube = new Node({x:0, y:0, z:-10 },undefined,undefined,cube_with_grant);
+	const texture_cube = new Node({x:-4.5,y:0,z:-10},undefined,undefined,cube_with_textures_mesh);
+	const grant_cube = new Node({x:0, y:0, z:-10 },undefined,undefined,cube_with_grant_mesh);
 
-	const sun = new Node({x:6,y:0,z:-10}, undefined, undefined, sun_mesh);
+	const metal_sphere = new Node({x:5,y:0,z:-10},undefined,undefined,metal_sphere_mesh);
+
+
+	//const sun = new Node({x:6,y:0,z:-10}, undefined, undefined, sun_mesh);
 	//const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
 	//const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
 
@@ -90,7 +100,18 @@ async function main() {
 	root.add_child(texture_cube);
 	root.add_child(grant_cube);
 
-	root.add_child(sun);
+	root.add_child(metal_sphere);
+
+	// Mesh.from_obj_file(gl,'../assets/obj_files/teapot.obj',program,(m) => {const teapot = new Node(
+	// 		{ x: 10, y: 0, z: -10 },
+	// 		undefined,
+	// 		undefined,
+	// 		m);
+	// 		root.add_child(teapot);}
+	// );
+
+
+	//root.add_child(sun);
 	//sun.add_child(earth);
 	//earth.add_child(moon);
 
@@ -109,7 +130,7 @@ async function main() {
 		let dt = (now - previous) / 1000;
 		previous = now;
 
-		sun.rotation.yaw += 0.05 * dt;
+		//sun.rotation.yaw += 0.05 * dt;
 		//earth.rotation.yaw += 0.5 * dt;
 		//moon.rotation.roll += 1.0 * dt;
 
