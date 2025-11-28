@@ -420,7 +420,7 @@ export class UvMesh {
 	render(gl: WebGLRenderingContext) {
 		gl.frontFace(gl.CW)
 		gl.cullFace(gl.BACK);
-		gl.enable(gl.CULL_FACE);
+		//gl.enable(gl.CULL_FACE);
 
 		gl.useProgram(this.program);
 		this.set_vertex_attrib_buffers(gl);
@@ -453,39 +453,112 @@ export class UvMesh {
 		let hdepth = depth / 2.0;
 
 		let verts = [
-			hwidth, -hheight, -hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0,
-			hwidth, hheight, -hdepth, 1.0, 1.0, 0.5, 1.0, 1.0, 0.0,
+			hwidth, -hheight, -hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0,0,-1,
+			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0,0,-1,
+			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0,0,-1,
+			hwidth, hheight, -hdepth, 1.0, 1.0, 0.5, 1.0, 1.0, 0.0, 0,0,-1,
 
-			hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-			hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-			hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0,
-			hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 1.0, 0.0,
+			hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1,0,0,
+			hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1,0,0,
+			hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 1,0,0,
+			hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 1.0, 0.0, 1,0,0,
 
-			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
-			hwidth, -hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 0.0, 1.0,
-			hwidth, hheight, hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0,
-			-hwidth, hheight, hdepth, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0,
+			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0,0,1,
+			hwidth, -hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 0.0, 1.0, 0,0, 1,
+			hwidth, hheight, hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0,0, 1,
+			-hwidth, hheight, hdepth, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0,0, 1,
 
-			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0,
-			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 1.0, 0.0,
-			-hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 0.0, 0.0,
+			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1,0,0,
+			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1,0,0,
+			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 1.0, 0.0, -1,0,0,
+			-hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 0.0, 0.0, -1,0,0,
 
-			-hwidth, hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0,
-			hwidth, hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0,
-			hwidth, hheight, hdepth, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
-			-hwidth, hheight, hdepth, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+			-hwidth, hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0,1,0,
+			hwidth, hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0,1,0,
+			hwidth, hheight, hdepth, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0,1,0,
+			-hwidth, hheight, hdepth, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0,1,0,
 
-			-hwidth, -hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0,
-			hwidth, -hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0,
-			hwidth, -hheight, hdepth, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0,
-			-hwidth, -hheight, hdepth, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0,
+			-hwidth, -hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0,-1,0,
+			hwidth, -hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0,-1,0,
+			hwidth, -hheight, hdepth, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0,-1,0,
+			-hwidth, -hheight, hdepth, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0,-1,0,
 		];
 
 		let indis = [
-			// clockwise winding
+			// // clockwise winding
+			0, 3, 2, 2, 1, 0,
+			4, 7, 6, 6, 5, 4,
+			8, 11, 10, 10, 9, 8,
+			12, 13, 14, 14, 15, 12,
+			16, 17, 18, 18, 19, 16,
+			20, 23, 22, 22, 21, 20,
+
+			// counter-clockwise winding
+			// 2, 1, 0, 2, 0, 3,
+			// 6, 5, 4, 4, 7, 6,
+			// 10, 9, 8, 8, 11, 10,
+			// 12, 13, 14, 14, 15, 12,
+			// 16, 17, 18, 18, 19, 16,
+			// 22, 21, 20, 20, 23, 22,
+		];
+
+		return new UvMesh(gl, program, verts, indis, texture, material);
+	}
+
+	static texture_box(
+		gl: WebGLRenderingContext,
+		program: WebGLProgram,
+		width: number,
+		height: number,
+		depth: number,
+		texture: Texture,
+		material: Material,
+	) {
+		let hwidth = width / 2.0;
+		let hheight = height / 2.0;
+		let hdepth = depth / 2.0;
+
+		const top = { uMin: 0.5, vMin: 0, uMax: 0.75, vMax: 0.25 }; // gravel
+		const front = { uMin: 0, vMin: 0.25, uMax: 0.25, vMax: 0.5 }; // chain link
+		const right = { uMin: 0.25, vMin: 0.25, uMax: 0.5, vMax: 0.5 }; // brick
+		const back = { uMin: 0.5, vMin: 0.25, uMax: 0.75, vMax: 0.5 }; // ivy
+		const left = { uMin: 0.75, vMin: 0.25, uMax: 1, vMax: 0.5 }; // wood
+		const bottom = { uMin: 0.5, vMin: 0.5, uMax: 0.75, vMax: 0.75 }; // stone
+
+		let verts = [
+			hwidth, -hheight, -hdepth, 1.0, 0.0, 1.0, 1.0, front.uMax, front.vMax, 0,0,-1,
+			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, front.uMin, front.vMax, 0,0,-1,
+			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, front.uMin, front.vMin, 0,0,-1,
+			hwidth, hheight, -hdepth, 1.0, 1.0, 0.5, 1.0, front.uMax, front.vMin, 0,0,-1,
+
+			hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, right.uMax, right.vMax, 1,0,0,
+			hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, right.uMin, right.vMax, 1,0,0,
+			hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, right.uMin, right.vMin, 1,0,0,
+			hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, right.uMax, right.vMin, 1,0,0,
+
+			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, back.uMax, back.vMax, 0,0,1,
+			hwidth, -hheight, hdepth, 1.0, 1.0, 0.5, 1.0, back.uMin, back.vMax, 0,0, 1,
+			hwidth, hheight, hdepth, 0.5, 0.5, 1.0, 1.0, back.uMin, back.vMin, 0,0, 1,
+			-hwidth, hheight, hdepth, 0.0, 1.0, 1.0, 1.0, back.uMax, back.vMin,0,0, 1,
+
+			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0,left.uMax, left.vMax,-1,0,0,
+			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0,left.uMin, left.vMax, -1,0,0,
+			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0,left.uMin, left.vMin, -1,0,0,
+			-hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, left.uMax, left.vMin, -1,0,0,
+
+			-hwidth, hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, top.uMax, top.vMax, 0,1,0,
+			hwidth, hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, top.uMin, top.vMax, 0,1,0,
+			hwidth, hheight, hdepth, 0.0, 0.0, 1.0, 1.0, top.uMin, top.vMin, 0,1,0,
+			-hwidth, hheight, hdepth, 1.0, 1.0, 0.0, 1.0, top.uMax, top.vMin, 0,1,0,
+
+			-hwidth, -hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, bottom.uMax, bottom.vMax, 0,-1,0,
+			hwidth, -hheight, -hdepth, 0.0, 1.0, 0.0, 1.0,  bottom.uMin, bottom.vMax, 0,-1,0,
+			hwidth, -hheight, hdepth, 0.0, 0.0, 1.0, 1.0, bottom.uMin, bottom.vMin, 0,-1,0,
+			-hwidth, -hheight, hdepth, 1.0, 1.0, 0.0, 1.0,bottom.uMax, bottom.vMin, 0,-1,0,
+		];
+
+		let indis = [
+			// // clockwise winding
 			0, 3, 2, 2, 1, 0,
 			4, 7, 6, 6, 5, 4,
 			8, 11, 10, 10, 9, 8,

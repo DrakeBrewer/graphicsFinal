@@ -1,5 +1,5 @@
 import Camera, { Controls } from "./camera";
-import { UvMesh, type Material } from "./mesh";
+import { Mesh,UvMesh, type Material } from "./mesh";
 import Node from "./sceneGraph";
 import { Texture } from "./texture";
 import type { Color } from "./types";
@@ -41,26 +41,32 @@ async function main() {
 	const program = await create_compile_and_link_program(gl, vertex_src, fragment_src);
 	gl.useProgram(program);
 
-	const texture = new Texture(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR);
+	const grant_texture = new Texture(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR);
+	const cube_texture = new Texture(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR);
+
+	const cube_material: Material = {ambient:1.0, diffuse:0.0, specular:2.0,shininess:9.0};
+	const cube_with_textures = UvMesh.texture_box(gl,program, 3,3,3,cube_texture,cube_material);
+	const cube_with_grant = UvMesh.box(gl,program,3,3,3,grant_texture,cube_material);
+
 	const sun_material: Material = { ambient: 1.0, diffuse: 0.0, specular: 2.0, shininess: 9.0 };
 	const sun_mesh = UvMesh.sphere(
 		gl, program, 16.0, 16,
 		{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
-		texture, sun_material
+		grant_texture, sun_material
 	);
 
 	const moon_material: Material = { ambient: 0.25, diffuse: 1.0, specular: 2.0, shininess: 4.0 };
 	const moon_mesh = UvMesh.sphere(
 		gl, program, 3.0, 16,
 		{ r: 0.7, g: 0.7, b: 0.7, a: 1.0 },
-		texture, moon_material
+		grant_texture, moon_material
 	);
 
 	const earth_material: Material = { ambient: 0.25, diffuse: 1.0, specular: 2.0, shininess: 4.0 };
 	const earth_mesh = UvMesh.sphere(
 		gl, program, 8.0, 16,
 		{ r: 0.88, g: 0.66, b: 0.37, a: 1.0 },
-		texture, earth_material
+		grant_texture, earth_material
 	);
 
 	const controls = Controls.start_listening();
@@ -73,15 +79,20 @@ async function main() {
 
 	const root = new Node();
 	const camera = new Node({ x: 0, y: 0, z: -25 });
+	const texture_cube = new Node({x:-4.5,y:0,z:-10},undefined,undefined,cube_with_textures);
+	const grant_cube = new Node({x:0, y:0, z:-10 },undefined,undefined,cube_with_grant);
 
-	const sun = new Node(undefined, undefined, undefined, sun_mesh);
-	const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
-	const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
+	const sun = new Node({x:6,y:0,z:-10}, undefined, undefined, sun_mesh);
+	//const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
+	//const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
 
 	root.add_child(camera);
+	root.add_child(texture_cube);
+	root.add_child(grant_cube);
+
 	root.add_child(sun);
-	sun.add_child(earth);
-	earth.add_child(moon);
+	//sun.add_child(earth);
+	//earth.add_child(moon);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -99,8 +110,8 @@ async function main() {
 		previous = now;
 
 		sun.rotation.yaw += 0.05 * dt;
-		earth.rotation.yaw += 0.5 * dt;
-		moon.rotation.roll += 1.0 * dt;
+		//earth.rotation.yaw += 0.5 * dt;
+		//moon.rotation.roll += 1.0 * dt;
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
