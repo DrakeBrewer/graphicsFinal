@@ -6,6 +6,13 @@ type ControlState = Map<Key, boolean>;
 
 export class Controls {
 	state: ControlState;
+	mouse: {
+		x: number;
+		y: number;
+		deltaX: number;
+		deltaY: number;
+		isLocked: boolean;
+	}
 	constructor() {
 		this.state = new Map<Key, boolean>([
 			['KeyW', false],      // Foward
@@ -15,27 +22,30 @@ export class Controls {
 
 			['Space', false],     // Up
 			['KeyC', false],      // Down
-
-			['ArrowUp', false],   // Pitch Down
-			['ArrowDown', false], // Pitch Up
-			['ArrowLeft', false], // Yaw Left
-			['ArrowRight', false],// Yaw Right
 		]);
+
+		this.mouse = {
+			x: 0,
+			y: 0,
+			deltaX: 0,
+			deltaY: 0,
+			isLocked: false,
+		};
 	}
 
 	static start_listening() {
-		let keys = new Controls();
+		let controls = new Controls();
 
 		addEventListener('keydown', (ev: KeyboardEvent) => {
 			if (typeof ev.code !== 'string') {
 				return;
 			}
 
-			if (keys.state.get(ev.code) === undefined) {
+			if (controls.state.get(ev.code) === undefined) {
 				return;
 			}
 
-			keys.state.set(ev.code, true);
+			controls.state.set(ev.code, true);
 		});
 
 		addEventListener('keyup', (ev: KeyboardEvent) => {
@@ -43,14 +53,42 @@ export class Controls {
 				return;
 			}
 
-			if (keys.state.get(ev.code) === undefined) {
+			if (controls.state.get(ev.code) === undefined) {
 				return;
 			}
 
-			keys.state.set(ev.code, false);
+			controls.state.set(ev.code, false);
 		});
 
-		return keys;
+		const canvas = document.getElementById("mainCanvas") as HTMLCanvasElement;
+		canvas.addEventListener('click', () => {
+			canvas.requestPointerLock();
+		});
+
+		document.addEventListener('pointerlockchange', () => {
+			controls.mouse.isLocked = document.pointerLockElement === canvas;
+		});
+
+		addEventListener('mousemove', (ev: MouseEvent) => {
+			if (controls.mouse.isLocked) {
+				controls.mouse.deltaX = ev.movementX
+				controls.mouse.deltaY = ev.movementY
+			}
+		});
+
+		return controls;
+	}
+
+	get_mouse_delta() {
+		const delta = {
+			x: this.mouse.deltaX,
+			y: this.mouse.deltaY
+		}
+
+		this.mouse.deltaX = 0;
+		this.mouse.deltaY = 0;
+
+		return delta
 	}
 
 	is_key_down(code: string) {
