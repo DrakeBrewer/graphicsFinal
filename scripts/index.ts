@@ -123,26 +123,26 @@ async function main() {
 	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, metal_scale_mat);
 	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
 
-	// const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
-	// const sun_mesh = UvMesh.sphere(
-	// 	gl, program, 16.0, 16,
-	// 	{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
-	// 	sun_material
-	// );
+	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
+	const sun_mesh = UvMesh.sphere(
+		gl, program, 16.0, 16,
+		{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
+		sun_material
+	);
 
-	// const moon_material = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
-	// const moon_mesh = UvMesh.sphere(
-	// 	gl, program, 3.0, 16,
-	// 	{ r: 0.7, g: 0.7, b: 0.7, a: 1.0 },
-	// 	moon_material
-	// );
+	const moon_material = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
+	const moon_mesh = UvMesh.sphere(
+		gl, program, 3.0, 16,
+		{ r: 0.7, g: 0.7, b: 0.7, a: 1.0 },
+		moon_material
+	);
 
-	// const earth_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
-	// const earth_mesh = UvMesh.sphere(
-	// 	gl, program, 8.0, 16,
-	// 	{ r: 0.88, g: 0.66, b: 0.37, a: 1.0 },
-	// 	earth_material
-	// );
+	const earth_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
+	const earth_mesh = UvMesh.sphere(
+		gl, program, 8.0, 16,
+		{ r: 0.88, g: 0.66, b: 0.37, a: 1.0 },
+		earth_material
+	);
 
 	const controls = Controls.start_listening();
 
@@ -161,9 +161,9 @@ async function main() {
 
 	const metal_sphere = new Node({ x: 5, y: 0, z: -10 }, undefined, undefined, metal_sphere_mesh);
 
-	// const sun = new Node({ x: 6, y: 0, z: -10 }, undefined, undefined, sun_mesh);
-	// const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
-	// const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
+	const sun = new Node({ x: 6, y: 0, z: -10 }, undefined, undefined, sun_mesh);
+	const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
+	const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
 
 	root.add_child(camera);
 	root.add_child(ground);
@@ -179,9 +179,9 @@ async function main() {
 	// 		root.add_child(teapot);}
 	// );
 
-	// root.add_child(sun);
-	// sun.add_child(earth);
-	// earth.add_child(moon);
+	root.add_child(sun);
+	sun.add_child(earth);
+	earth.add_child(moon);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -198,9 +198,9 @@ async function main() {
 		let dt = (now - previous) / 1000;
 		previous = now;
 
-		// sun.rotation.yaw += 0.05 * dt;
-		// earth.rotation.yaw += 0.5 * dt;
-		// moon.rotation.roll += 1.0 * dt;
+		sun.rotation.yaw += 0.05 * dt;
+		earth.rotation.yaw += 0.5 * dt;
+		moon.rotation.roll += 1.0 * dt;
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
