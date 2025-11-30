@@ -114,20 +114,21 @@ async function main() {
 		[0.6, 1.0, 1.5, 2.1, 2.7, 3.2, 3.6, 3.4, 3.7, 4.0, 4.3, 4.6, 4.4, 4.7, 5.0],
 		[0.3, 0.7, 1.2, 1.8, 2.4, 2.9, 3.3, 3.1, 3.4, 3.7, 4.0, 4.3, 4.1, 4.4, 4.7]
 	];
+
 	const texture_map_mat = new Material(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0);
 	const metal_scale_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const metal_sphere_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
+	const grant_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 
 	const height_map = Mesh.from_heightmap(gl, program, hm, 0, 7.6, metal_scale_mat);
 	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, texture_map_mat);
 	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, metal_scale_mat);
 	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
 
-	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const sun_mesh = UvMesh.sphere(
 		gl, program, 16.0, 16,
 		{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
-		sun_material
+		metal_sphere_mat
 	);
 
 	const moon_material = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
@@ -141,7 +142,7 @@ async function main() {
 	const earth_mesh = UvMesh.sphere(
 		gl, program, 8.0, 16,
 		{ r: 0.88, g: 0.66, b: 0.37, a: 1.0 },
-		earth_material
+		metal_sphere_mat
 	);
 
 	const controls = Controls.start_listening();
@@ -167,21 +168,27 @@ async function main() {
 
 	root.add_child(camera);
 	root.add_child(ground);
-	root.add_child(texture_cube);
-	root.add_child(grant_cube);
-	root.add_child(metal_sphere);
+	// root.add_child(texture_cube);
+	// root.add_child(grant_cube);
+	// root.add_child(metal_sphere);
 
-	// Mesh.from_obj_file(gl,'../assets/obj_files/teapot.obj',program,(m) => {const teapot = new Node(
-	// 		{ x: 10, y: 0, z: -10 },
-	// 		undefined,
-	// 		undefined,
-	// 		m);
-	// 		root.add_child(teapot);}
-	// );
+	// TODO: from obj needs to be more fleshed out if we want to load a building. Current impl completely falls
+	// apart with advanced objects like the interior.
+	Mesh.from_obj_file(gl, '../assets/obj_files/lessCoolBuilding.obj', program, metal_sphere_mat, (m) => {
+		const teapot = new Node(
+			{ x: 10, y: 0, z: -10 },
+			undefined,
+			undefined,
+			m
+		);
 
-	root.add_child(sun);
-	sun.add_child(earth);
-	earth.add_child(moon);
+		root.add_child(teapot);
+	}
+	);
+
+	// root.add_child(sun);
+	// sun.add_child(earth);
+	// earth.add_child(moon);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
