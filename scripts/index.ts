@@ -1,7 +1,7 @@
-import Camera, { Controls } from "./camera";
-import { Mesh,UvMesh, type Material } from "./mesh";
+import { Controls } from "./camera";
+import { UvMesh } from "./mesh/uv.ts";
+import Material from "./mesh/material";
 import Node from "./sceneGraph";
-import { Texture } from "./texture";
 import type { Color } from "./types";
 import {
 	DESIRED_MSPT,
@@ -19,6 +19,7 @@ import {
 	create_and_load_elements_buffer,
 } from "./utils/webGl";
 import { generate_render_jobs, RenderMesh } from "./rendering/mesh"
+import { Mesh } from "./mesh/normal.ts";
 
 const canvas = document.getElementById("mainCanvas") as HTMLCanvasElement;
 if (!canvas) {
@@ -27,36 +28,26 @@ if (!canvas) {
 
 //Skybox verts
 const sky_box_verts = [
-
-	-1,-1,1,
-
-	1,-1,1,
-
-	1,1,1,
-
-	-1,1,1,
-
-	-1,-1,-1,
-
-	1,-1,-1,
-
-	1,1,-1,
-
-	-1,1,-1,
+	-1, -1, 1,
+	1, -1, 1,
+	1, 1, 1,
+	-1, 1, 1,
+	-1, -1, -1,
+	1, -1, -1,
+	1, 1, -1,
+	-1, 1, -1,
 
 ];
 
 const sky_box_indicies = [
-	0,1,2,0,2,3,
-	1,5,6,1,6,2,
-	5,4,7,5,7,6,
-	4,0,3,4,3,7,
-	3,2,6,3,6,7,
-	4,5,1,4,1,0,
+	0, 1, 2, 0, 2, 3,
+	1, 5, 6, 1, 6, 2,
+	5, 4, 7, 5, 7, 6,
+	4, 0, 3, 4, 3, 7,
+	3, 2, 6, 3, 6, 7,
+	4, 5, 1, 4, 1, 0,
 
 ];
-
-
 
 async function main() {
 	const gl = canvas!.getContext('webgl2');
@@ -75,14 +66,14 @@ async function main() {
 	const sky_box_vao = gl.createVertexArray()!;
 	gl.bindVertexArray(sky_box_vao);
 
-	const sky_box_vbo = create_and_load_vertex_buffer(gl,sky_box_verts,gl.STATIC_DRAW);
-	const sky_box_ebo = create_and_load_elements_buffer(gl,sky_box_indicies,gl.STATIC_DRAW);
+	const sky_box_vbo = create_and_load_vertex_buffer(gl, sky_box_verts, gl.STATIC_DRAW);
+	const sky_box_ebo = create_and_load_elements_buffer(gl, sky_box_indicies, gl.STATIC_DRAW);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER,sky_box_vbo);
-	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sky_box_ebo);
+	gl.bindBuffer(gl.ARRAY_BUFFER, sky_box_vbo);
+	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sky_box_ebo);
 
 	gl.enableVertexAttribArray(0);
-	gl.vertexAttribPointer(0,3,gl.FLOAT,false,12,0);
+	gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 12, 0);
 
 	gl.bindVertexArray(null);
 
@@ -93,9 +84,9 @@ async function main() {
 	const sky_frag = '../assets/shaders/skybox_fragment.glsl';
 
 	const program = await create_compile_and_link_program(gl, vertex_src, fragment_src);
-	const sky_prog = await create_compile_and_link_program(gl,sky_shade,sky_frag);
-	//gl.useProgram(sky_prog);
-	//gl.useProgram(program);
+	const sky_prog = await create_compile_and_link_program(gl, sky_shade, sky_frag);
+	gl.useProgram(sky_prog);
+	gl.useProgram(program);
 
 	const skybox_texture = loadCubemap(gl, [
 		'../assets/textures/px.png',
@@ -104,44 +95,53 @@ async function main() {
 		'../assets/textures/ny.png',
 		'../assets/textures/pz.png',
 		'../assets/textures/nz.png',
-		
-		]);
+	]);
 
+	const hm = [
+		[2.3, 1.8, 2.1, 3.4, 2.9, 3.1, 2.7, 3.5, 4.1, 3.8, 4.2, 3.9, 4.5, 4.8, 5.1],
+		[1.9, 2.4, 2.8, 3.1, 3.5, 3.8, 4.2, 4.0, 4.3, 4.6, 4.9, 5.2, 5.0, 5.3, 5.6],
+		[2.2, 2.6, 3.0, 3.6, 4.1, 4.4, 4.7, 4.5, 4.8, 5.1, 5.4, 5.7, 5.5, 5.8, 6.1],
+		[2.5, 2.9, 3.3, 3.9, 4.5, 5.0, 5.3, 5.1, 5.4, 5.7, 6.0, 6.3, 6.1, 6.4, 6.7],
+		[2.8, 3.2, 3.7, 4.3, 4.9, 5.4, 5.8, 5.6, 5.9, 6.2, 6.5, 6.8, 6.6, 6.9, 7.2],
+		[3.1, 3.5, 4.0, 4.6, 5.2, 5.7, 6.1, 6.0, 6.3, 6.6, 6.9, 7.2, 7.0, 7.3, 7.6],
+		[2.7, 3.1, 3.6, 4.2, 4.8, 5.3, 5.7, 5.5, 5.8, 6.1, 6.4, 6.7, 6.5, 6.8, 7.1],
+		[2.4, 2.8, 3.3, 3.9, 4.5, 5.0, 5.4, 5.2, 5.5, 5.8, 6.1, 6.4, 6.2, 6.5, 6.8],
+		[2.1, 2.5, 3.0, 3.6, 4.2, 4.7, 5.1, 4.9, 5.2, 5.5, 5.8, 6.1, 5.9, 6.2, 6.5],
+		[1.8, 2.2, 2.7, 3.3, 3.9, 4.4, 4.8, 4.6, 4.9, 5.2, 5.5, 5.8, 5.6, 5.9, 6.2],
+		[1.5, 1.9, 2.4, 3.0, 3.6, 4.1, 4.5, 4.3, 4.6, 4.9, 5.2, 5.5, 5.3, 5.6, 5.9],
+		[1.2, 1.6, 2.1, 2.7, 3.3, 3.8, 4.2, 4.0, 4.3, 4.6, 4.9, 5.2, 5.0, 5.3, 5.6],
+		[0.9, 1.3, 1.8, 2.4, 3.0, 3.5, 3.9, 3.7, 4.0, 4.3, 4.6, 4.9, 4.7, 5.0, 5.3],
+		[0.6, 1.0, 1.5, 2.1, 2.7, 3.2, 3.6, 3.4, 3.7, 4.0, 4.3, 4.6, 4.4, 4.7, 5.0],
+		[0.3, 0.7, 1.2, 1.8, 2.4, 2.9, 3.3, 3.1, 3.4, 3.7, 4.0, 4.3, 4.1, 4.4, 4.7]
+	];
+	const texture_map_mat = new Material(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0);
+	const metal_scale_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
+	const metal_sphere_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
 
+	const height_map = Mesh.from_heightmap(gl, program, hm, 0, 7.6, metal_scale_mat);
+	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, texture_map_mat);
+	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, metal_scale_mat);
+	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
 
-	const grant_texture = new Texture(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR);
-	const cube_texture = new Texture(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR);
-	const metal_texture = new Texture(gl, '../assets/textures/metal_scale.png',gl.LINEAR_MIPMAP_LINEAR);
-
-	const cube_material: Material = {ambient:1.0, diffuse:0.0, specular:2.0,shininess:9.0};
-	const cube_with_textures_mesh = UvMesh.texture_box(gl,program, 3,3,3,cube_texture,cube_material);
-	const cube_with_grant_mesh = UvMesh.box(gl,program,3,3,3,grant_texture,cube_material);
-
-	const metal_sphere_material: Material = {ambient:0.25, diffuse:1.0, specular: 2.0, shininess: 4.0};
-	const metal_sphere_mesh = UvMesh.sphere(gl,program,8,16,{r:1,g:1,b:1,a:1},metal_texture,metal_sphere_material);
-
-	//const teapot_material: Material = {}
-
-
-	const sun_material: Material = { ambient: 1.0, diffuse: 0.0, specular: 2.0, shininess: 9.0 };
+	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const sun_mesh = UvMesh.sphere(
 		gl, program, 16.0, 16,
 		{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
-		grant_texture, sun_material
+		sun_material
 	);
 
-	const moon_material: Material = { ambient: 0.25, diffuse: 1.0, specular: 2.0, shininess: 4.0 };
+	const moon_material = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
 	const moon_mesh = UvMesh.sphere(
 		gl, program, 3.0, 16,
 		{ r: 0.7, g: 0.7, b: 0.7, a: 1.0 },
-		grant_texture, moon_material
+		moon_material
 	);
 
-	const earth_material: Material = { ambient: 0.25, diffuse: 1.0, specular: 2.0, shininess: 4.0 };
+	const earth_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
 	const earth_mesh = UvMesh.sphere(
 		gl, program, 8.0, 16,
 		{ r: 0.88, g: 0.66, b: 0.37, a: 1.0 },
-		grant_texture, earth_material
+		earth_material
 	);
 
 	const controls = Controls.start_listening();
@@ -154,20 +154,21 @@ async function main() {
 
 	const root = new Node();
 	const camera = new Node({ x: 0, y: 0, z: -25 });
-	const texture_cube = new Node({x:-4.5,y:0,z:-10},undefined,undefined,cube_with_textures_mesh);
-	const grant_cube = new Node({x:0, y:0, z:-10 },undefined,undefined,cube_with_grant_mesh);
+	const texture_cube = new Node({ x: -4.5, y: 0, z: -10 }, undefined, undefined, cube_with_textures_mesh);
+	const grant_cube = new Node({ x: 0, y: 0, z: -10 }, undefined, undefined, cube_with_grant_mesh);
 
-	const metal_sphere = new Node({x:5,y:0,z:-10},undefined,undefined,metal_sphere_mesh);
+	const ground = new Node({ x: 0, y: 0, z: 0 }, undefined, undefined, height_map)
 
+	const metal_sphere = new Node({ x: 5, y: 0, z: -10 }, undefined, undefined, metal_sphere_mesh);
 
-	//const sun = new Node({x:6,y:0,z:-10}, undefined, undefined, sun_mesh);
-	//const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
-	//const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
+	const sun = new Node({ x: 6, y: 0, z: -10 }, undefined, undefined, sun_mesh);
+	const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
+	const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
 
 	root.add_child(camera);
+	root.add_child(ground);
 	root.add_child(texture_cube);
 	root.add_child(grant_cube);
-
 	root.add_child(metal_sphere);
 
 	// Mesh.from_obj_file(gl,'../assets/obj_files/teapot.obj',program,(m) => {const teapot = new Node(
@@ -178,10 +179,9 @@ async function main() {
 	// 		root.add_child(teapot);}
 	// );
 
-
-	//root.add_child(sun);
-	//sun.add_child(earth);
-	//earth.add_child(moon);
+	root.add_child(sun);
+	sun.add_child(earth);
+	earth.add_child(moon);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -198,9 +198,9 @@ async function main() {
 		let dt = (now - previous) / 1000;
 		previous = now;
 
-		//sun.rotation.yaw += 0.05 * dt;
-		//earth.rotation.yaw += 0.5 * dt;
-		//moon.rotation.roll += 1.0 * dt;
+		sun.rotation.yaw += 0.05 * dt;
+		earth.rotation.yaw += 0.5 * dt;
+		moon.rotation.roll += 1.0 * dt;
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
@@ -225,22 +225,21 @@ async function main() {
 
 		gl.useProgram(sky_prog);
 
-		set_uniform_matrix4(gl,sky_prog,'u_projection',projection.data);
-		set_uniform_matrix4(gl,sky_prog,'u_view',view_no_trans.data);
+		set_uniform_matrix4(gl, sky_prog, 'u_projection', projection.data);
+		set_uniform_matrix4(gl, sky_prog, 'u_view', view_no_trans.data);
 
 		gl.activeTexture(gl.TEXTURE0);
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP,skybox_texture);
-		
-		const skybox_location = gl.getUniformLocation(sky_prog,'u_skybox');
-		gl.uniform1i(skybox_location,0);
+		gl.bindTexture(gl.TEXTURE_CUBE_MAP, skybox_texture);
+
+		const skybox_location = gl.getUniformLocation(sky_prog, 'u_skybox');
+		gl.uniform1i(skybox_location, 0);
 
 		gl.bindVertexArray(sky_box_vao);
-		gl.drawElements(gl.TRIANGLES,sky_box_indicies.length,gl.UNSIGNED_SHORT,0);
+		gl.drawElements(gl.TRIANGLES, sky_box_indicies.length, gl.UNSIGNED_SHORT, 0);
 		gl.bindVertexArray(null);
 
 		gl.depthMask(true);
 		gl.depthFunc(gl.LESS);
-
 
 		//Render other objects
 		gl.useProgram(program);

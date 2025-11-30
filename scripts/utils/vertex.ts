@@ -4,18 +4,13 @@ class Vec4 {
 	z: number;
 	w: number;
 
-	constructor(x: number, y: number, z: number, w: number) {
+	constructor(x: number, y: number, z: number, w?: number) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.w = w ?? 0;
 	}
 
-	/**
-	 * Returns the vector that is this vector scaled by the given scalar.
-	 * @param {number} by the scalar to scale with 
-	 * @returns {Vec4}
-	 */
 	scaled(scalar: number): Vec4 {
 		return new Vec4(
 			this.x * scalar,
@@ -25,11 +20,6 @@ class Vec4 {
 		);
 	}
 
-	/**
-	 * Returns the dot product between this vector and other
-	 * @param {Vec4} other the other vector 
-	 * @returns {number}
-	 */
 	dot(other: Vec4): number {
 		// return the dot product 
 		return (
@@ -40,19 +30,11 @@ class Vec4 {
 		);
 	}
 
-	/**
-	 * Returns the length of this vector
-	 * @returns {number}
-	 */
 	length(): number {
 		// return the length
 		return Math.hypot(this.x, this.y, this.z, this.w);
 	}
 
-	/**
-	 * Returns a normalized version of this vector
-	 * @returns {Vec4}
-	 */
 	norm(): Vec4 {
 		// return the normalized vector
 		const normalized = {
@@ -65,10 +47,6 @@ class Vec4 {
 		return new Vec4(normalized.x, normalized.y, normalized.z, normalized.w);
 	}
 
-	/**
-	 * Returns the vector sum between this and other.
-	 * @param {Vec4} other 
-	 */
 	add(other: Vec4): Vec4 {
 		// return the vector sum
 		return new Vec4(
@@ -89,6 +67,12 @@ class Vec4 {
 		let z = this.x * other.y - this.y * other.x;
 
 		return new Vec4(x, y, z, 0);
+	}
+
+	static normal_of_triangle(p0: Vec4, p1: Vec4, p2: Vec4) {
+		let v0 = p1.sub(p0);
+		let v1 = p2.sub(p0);
+		return v0.cross(v1);
 	}
 
 	toString() {
