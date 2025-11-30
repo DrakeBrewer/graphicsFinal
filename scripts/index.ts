@@ -13,7 +13,10 @@ import {
 	set_render_params,
 	create_compile_and_link_program,
 	set_uniform_matrix4,
-	set_uniform3fv
+	set_uniform3fv,
+	loadCubemap,
+	create_and_load_vertex_buffer,
+	create_and_load_elements_buffer,
 } from "./utils/webGl";
 import { generate_render_jobs, RenderMesh } from "./rendering/mesh"
 
@@ -23,7 +26,7 @@ if (!canvas) {
 }
 
 //Skybox verts
-const sky_box_verts = new Float32Array([
+const sky_box_verts = [
 
 	-1,-1,1,
 
@@ -41,9 +44,9 @@ const sky_box_verts = new Float32Array([
 
 	-1,1,-1,
 
-]);
+];
 
-const sky_box_indicies = new Uint16Array([
+const sky_box_indicies = [
 	0,1,2,0,2,3,
 	1,5,6,1,6,2,
 	5,4,7,5,7,6,
@@ -51,7 +54,7 @@ const sky_box_indicies = new Uint16Array([
 	3,2,6,3,6,7,
 	4,5,1,4,1,0,
 
-]);
+];
 
 
 
@@ -70,67 +73,18 @@ async function main() {
 	set_render_params(gl, render_bg);
 
 	const sky_box_vao = gl.createVertexArray()!;
-	const sky_box_vbo = gl.createBuffer()!;
-	const sky_box_ebo = gl.createBuffer()!;
-
 	gl.bindVertexArray(sky_box_vao);
 
-	gl.bindBuffer(gl.ARRAY_BUFFER,sky_box_vbo);
-	gl.bufferData(gl.ARRAY_BUFFER,sky_box_verts,gl.STATIC_DRAW);
+	const sky_box_vbo = create_and_load_vertex_buffer(gl,sky_box_verts,gl.STATIC_DRAW);
+	const sky_box_ebo = create_and_load_elements_buffer(gl,sky_box_indicies,gl.STATIC_DRAW);
 
+	gl.bindBuffer(gl.ARRAY_BUFFER,sky_box_vbo);
 	gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,sky_box_ebo);
-	gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,sky_box_indicies,gl.STATIC_DRAW);
 
 	gl.enableVertexAttribArray(0);
 	gl.vertexAttribPointer(0,3,gl.FLOAT,false,12,0);
 
 	gl.bindVertexArray(null);
-
-	function loadCubemap(gl:WebGL2RenderingContext,paths: string[]){
-		const tex = gl.createTexture()!;
-		gl.bindTexture(gl.TEXTURE_CUBE_MAP,tex);
-
-		const targets = [
-			gl.TEXTURE_CUBE_MAP_POSITIVE_X,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
-			gl.TEXTURE_CUBE_MAP_POSITIVE_Y,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_Y,
-			gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
-			gl.TEXTURE_CUBE_MAP_NEGATIVE_Z,
-		];
-
-		for(let i =0; i < 6; i++){
-			gl.texImage2D(targets[i],0,gl.RGBA,1,1,0,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array([0,0,0,255]));
-		};
-
-
-		let count = 0;
-		paths.forEach((path:string,i:number) =>{
-			const img = new Image();
-			img.src = path;
-			img.onload = () => {
-				console.log(path,img.naturalWidth,img.naturalHeight);
-				gl.bindTexture(gl.TEXTURE_CUBE_MAP,tex);
-				gl.texImage2D(targets[i],0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
-				count ++;
-
-				if(count === 6){
-					gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
-				}
-			};
-				
-		});
-
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
-		gl.texParameteri(gl.TEXTURE_CUBE_MAP,gl.TEXTURE_WRAP_R,gl.CLAMP_TO_EDGE);
-
-		return tex;
-
-	}
-
 
 
 	const vertex_src = "../assets/shaders/vertex.glsl";
