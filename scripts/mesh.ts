@@ -311,7 +311,7 @@ export class Mesh {
 				let coords = new Array<number>(3);
 				parts.slice(1).map((v, i) => coords[i] = parseFloat(v));
 
-				coordinates.push(...coords, 0.5, 0.75, 0.2, 1.0);
+				coordinates.push(...coords, 0.5, 0.75, 0.2, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
 			}
 
 			if (trimmed.startsWith('f ')) {
@@ -642,5 +642,5 @@ export class UvMesh {
 		}
 
 		return new UvMesh(gl, program, verts, indis, texture, material);
-	}
+	}	
 }
