@@ -6,6 +6,7 @@ import type { Color } from "./types";
 import {
 	DESIRED_MSPT,
 	FLY_SPEED_PER_FRAME,
+	MOUSE_SENSITIVITY,
 	ROTATION_SPEED_PER_FRAME
 } from "./utils/constants";
 import Mat4 from "./utils/matrix";
@@ -263,6 +264,12 @@ async function main() {
 			job.mesh.render(gl);
 		}
 
+		const mouseDelta = controls.get_mouse_delta();
+		if (mouseDelta.x !== 0 || mouseDelta.y !== 0) {
+			camera.add_yaw(mouseDelta.x * MOUSE_SENSITIVITY * dt);
+			camera.add_pitch(-mouseDelta.y * MOUSE_SENSITIVITY * dt);
+		}
+
 		window.requestAnimationFrame(render);
 	}
 
@@ -274,11 +281,6 @@ async function main() {
 
 		['Space', () => { camera.translate(0, FLY_SPEED_PER_FRAME, 0) }],
 		['KeyC', () => { camera.translate(0, -FLY_SPEED_PER_FRAME, 0) }],
-
-		['ArrowUp', () => { camera.add_pitch(-ROTATION_SPEED_PER_FRAME) }],
-		['ArrowDown', () => { camera.add_pitch(ROTATION_SPEED_PER_FRAME) }],
-		['ArrowLeft', () => { camera.add_yaw(-ROTATION_SPEED_PER_FRAME) }],
-		['ArrowRight', () => { camera.add_yaw(ROTATION_SPEED_PER_FRAME) }],
 	]);
 
 	const update = () => {
@@ -288,7 +290,9 @@ async function main() {
 				func();
 			}
 		}
+
 	}
+
 
 
 	window.addEventListener("resize", onResize)
