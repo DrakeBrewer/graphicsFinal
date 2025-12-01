@@ -94,42 +94,49 @@ export class UvMesh {
 		width: number,
 		height: number,
 		depth: number,
+		color: Color,
 		material: Material,
 	) {
 		let hwidth = width / 2.0;
 		let hheight = height / 2.0;
 		let hdepth = depth / 2.0;
 
+		let r = color.r;
+		let g = color.g;
+		let b = color.b;
+		let a = color.a;
+
+
 		let verts = [
-			hwidth, -hheight, -hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0, 0, -1,
-			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 0, 0, -1,
-			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0, 0, -1,
-			hwidth, hheight, -hdepth, 1.0, 1.0, 0.5, 1.0, 1.0, 0.0, 0, 0, -1,
+			hwidth, -hheight, -hdepth, r, g, b, a, 1.0, 1.0, 0, 0, -1,
+			-hwidth, -hheight, -hdepth, r, g, g, a, 0.0, 1.0, 0, 0, -1,
+			-hwidth, hheight, -hdepth, r, g, b, a, 0.0, 0.0, 0, 0, -1,
+			hwidth, hheight, -hdepth, r, g, b, a, 1.0, 0.0, 0, 0, -1,
 
-			hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1, 0, 0,
-			hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0, 1, 0, 0,
-			hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 1, 0, 0,
-			hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 1.0, 0.0, 1, 0, 0,
+			hwidth, -hheight, hdepth, r, g, b, a, 1.0, 1.0, 1, 0, 0,
+			hwidth, -hheight, -hdepth, r, g, b, a, 0.0, 1.0, 1, 0, 0,
+			hwidth, hheight, -hdepth, r, g, b, a, 0.0, 0.0, 1, 0, 0,
+			hwidth, hheight, hdepth, r, g, b, a, 1.0, 0.0, 1, 0, 0,
 
-			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0, 0, 1,
-			hwidth, -hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 0.0, 1.0, 0, 0, 1,
-			hwidth, hheight, hdepth, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0, 0, 1,
-			-hwidth, hheight, hdepth, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0, 0, 1,
+			-hwidth, -hheight, hdepth, r, g, b, a, 1.0, 1.0, 0, 0, 1,
+			hwidth, -hheight, hdepth, r,g,b,a, 0.0, 1.0, 0, 0, 1,
+			hwidth, hheight, hdepth, r,g,b,a, 0.0, 0.0, 0, 0, 1,
+			-hwidth, hheight, hdepth, r,g,b,a, 1.0, 0.0, 0, 0, 1,
 
-			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, -1, 0, 0,
-			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1, 0, 0,
-			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, 1.0, 0.0, -1, 0, 0,
-			-hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, 0.0, 0.0, -1, 0, 0,
+			-hwidth, -hheight, hdepth, r,g,b,a, 0.0, 1.0, -1, 0, 0,
+			-hwidth, -hheight, -hdepth, r,g,b,a, 1.0, 1.0, -1, 0, 0,
+			-hwidth, hheight, -hdepth, r,g,b,a, 1.0, 0.0, -1, 0, 0,
+			-hwidth, hheight, hdepth, r,g,b,a, 0.0, 0.0, -1, 0, 0,
 
-			-hwidth, hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0, 1, 0,
-			hwidth, hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0, 1, 0,
-			hwidth, hheight, hdepth, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0, 1, 0,
-			-hwidth, hheight, hdepth, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0, 1, 0,
+			-hwidth, hheight, -hdepth, r,g,b,a, 0.0, 1.0, 0, 1, 0,
+			hwidth, hheight, -hdepth, r,g,b,a, 1.0, 1.0, 0, 1, 0,
+			hwidth, hheight, hdepth, r,g,b,a, 1.0, 0.0, 0, 1, 0,
+			-hwidth, hheight, hdepth, r,g,b,a, 0.0, 0.0, 0, 1, 0,
 
-			-hwidth, -hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0, -1, 0,
-			hwidth, -hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0, -1, 0,
-			hwidth, -hheight, hdepth, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 0, -1, 0,
-			-hwidth, -hheight, hdepth, 1.0, 1.0, 0.0, 1.0, 0.0, 0.0, 0, -1, 0,
+			-hwidth, -hheight, -hdepth, r,g,b,a, 0.0, 1.0, 0, -1, 0,
+			hwidth, -hheight, -hdepth, r,g,b,a, 1.0, 1.0, 0, -1, 0,
+			hwidth, -hheight, hdepth, r,g,b,a, 1.0, 0.0, 0, -1, 0,
+			-hwidth, -hheight, hdepth, r,g,b,a, 0.0, 0.0, 0, -1, 0,
 		];
 
 		let indis = [
@@ -153,17 +160,89 @@ export class UvMesh {
 		return new UvMesh(gl, program, verts, indis, material);
 	}
 
+	static triangle(
+		gl: WebGL2RenderingContext,
+		program: WebGLProgram,
+		color: Color,
+		size: number,
+		material: Material,
+	) {
+		let r = color.r;
+		let g = color.g;
+		let b = color.b;
+		let a = color.a;
+
+		let verts = [
+		//Bottom Left 
+		-0.5*size, -0.25*size, 0.0*size,  r, 0.0, 0.0, a, 0.0, 0.0, 0.0,0.0,-1.0,
+		//Bottom Right
+		0.0*size, 0.6*size, 0.0*size,  0.0, g, 0.0, a, 0.5, 1.0, 0.0, 0.0, -1.0,
+		//Top Right
+		0.5*size, -0.25*size, 0.0*size,  0.0, 0.0, b, a, 1.0, 0.0, 0.0, 0.0, -1.0,
+
+		];
+
+		let indices = [
+			0,1,2
+		];
+
+		return new UvMesh(gl,program,verts,indices,material)
+
+	}
+
+	static rectangle(
+		gl: WebGL2RenderingContext,
+		program: WebGLProgram,
+		color: Color,
+		size: number,
+		material: Material,
+	) {
+
+		let r = color.r;
+		let g = color.g;
+		let b = color.b;
+		let a = color.a;
+
+		let verts = [
+			// BL
+			-0.5*size, -0.5*size, 0.0*size,   1.0, 0.0, 0.0, 1.0,   0.0, 0.0,   0.0, 0.0, 1.0,
+			// BR
+			0.5*size, -0.5*size, 0.0*size,   0.0, 1.0, 0.0, 1.0,   1.0, 0.0,   0.0, 0.0, 1.0,
+			// TR
+			0.5*size,  0.5*size, 0.0*size,   0.0, 0.0, 1.0, 1.0,   1.0, 1.0,   0.0, 0.0, 1.0,
+			// TL
+			-0.5*size,  0.5*size, 0.0*size,   1.0, 1.0, 0.0, 1.0,   0.0, 1.0,   0.0, 0.0, 1.0,
+		];
+
+		let indices = [
+			0,1,2,
+			0,2,3,
+
+		];
+
+		return new UvMesh(gl,program,verts,indices,material);
+
+
+	}
+
 	static texture_box(
 		gl: WebGLRenderingContext,
 		program: WebGLProgram,
 		width: number,
 		height: number,
 		depth: number,
+		color: Color,
 		material: Material,
 	) {
 		let hwidth = width / 2.0;
 		let hheight = height / 2.0;
 		let hdepth = depth / 2.0;
+
+		let r = color.r;
+		let g = color.g;
+		let b = color.b;
+		let a = color.a;
+
 
 		const top = { uMin: 0.5, vMin: 0, uMax: 0.75, vMax: 0.25 }; // gravel
 		const front = { uMin: 0, vMin: 0.25, uMax: 0.25, vMax: 0.5 }; // chain link
@@ -173,35 +252,35 @@ export class UvMesh {
 		const bottom = { uMin: 0.5, vMin: 0.5, uMax: 0.75, vMax: 0.75 }; // stone
 
 		let verts = [
-			hwidth, -hheight, -hdepth, 1.0, 0.0, 1.0, 1.0, front.uMax, front.vMax, 0, 0, -1,
-			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, front.uMin, front.vMax, 0, 0, -1,
-			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, front.uMin, front.vMin, 0, 0, -1,
-			hwidth, hheight, -hdepth, 1.0, 1.0, 0.5, 1.0, front.uMax, front.vMin, 0, 0, -1,
+			hwidth, -hheight, -hdepth, r,g,b,a, front.uMax, front.vMax, 0, 0, -1,
+			-hwidth, -hheight, -hdepth, r,g,b,a, front.uMin, front.vMax, 0, 0, -1,
+			-hwidth, hheight, -hdepth, r,g,b,a, front.uMin, front.vMin, 0, 0, -1,
+			hwidth, hheight, -hdepth, r,g,b,a, front.uMax, front.vMin, 0, 0, -1,
 
-			hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, right.uMax, right.vMax, 1, 0, 0,
-			hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, right.uMin, right.vMax, 1, 0, 0,
-			hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, right.uMin, right.vMin, 1, 0, 0,
-			hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, right.uMax, right.vMin, 1, 0, 0,
+			hwidth, -hheight, hdepth, r,g,b,a, right.uMax, right.vMax, 1, 0, 0,
+			hwidth, -hheight, -hdepth, r,g,b,a, right.uMin, right.vMax, 1, 0, 0,
+			hwidth, hheight, -hdepth, r,g,b,a, right.uMin, right.vMin, 1, 0, 0,
+			hwidth, hheight, hdepth, r,g,b,a, right.uMax, right.vMin, 1, 0, 0,
 
-			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, back.uMax, back.vMax, 0, 0, 1,
-			hwidth, -hheight, hdepth, 1.0, 1.0, 0.5, 1.0, back.uMin, back.vMax, 0, 0, 1,
-			hwidth, hheight, hdepth, 0.5, 0.5, 1.0, 1.0, back.uMin, back.vMin, 0, 0, 1,
-			-hwidth, hheight, hdepth, 0.0, 1.0, 1.0, 1.0, back.uMax, back.vMin, 0, 0, 1,
+			-hwidth, -hheight, hdepth, r,g,b,a, back.uMax, back.vMax, 0, 0, 1,
+			hwidth, -hheight, hdepth, r,g,b,a, back.uMin, back.vMax, 0, 0, 1,
+			hwidth, hheight, hdepth, r,g,b,a, back.uMin, back.vMin, 0, 0, 1,
+			-hwidth, hheight, hdepth, r,g,b,a, back.uMax, back.vMin, 0, 0, 1,
 
-			-hwidth, -hheight, hdepth, 1.0, 0.0, 1.0, 1.0, left.uMax, left.vMax, -1, 0, 0,
-			-hwidth, -hheight, -hdepth, 0.0, 1.0, 1.0, 1.0, left.uMin, left.vMax, -1, 0, 0,
-			-hwidth, hheight, -hdepth, 0.5, 0.5, 1.0, 1.0, left.uMin, left.vMin, -1, 0, 0,
-			-hwidth, hheight, hdepth, 1.0, 1.0, 0.5, 1.0, left.uMax, left.vMin, -1, 0, 0,
+			-hwidth, -hheight, hdepth, r,g,b,a, left.uMax, left.vMax, -1, 0, 0,
+			-hwidth, -hheight, -hdepth, r,g,b,a, left.uMin, left.vMax, -1, 0, 0,
+			-hwidth, hheight, -hdepth, r,g,b,a, left.uMin, left.vMin, -1, 0, 0,
+			-hwidth, hheight, hdepth, r,g,b,a, left.uMax, left.vMin, -1, 0, 0,
 
-			-hwidth, hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, top.uMax, top.vMax, 0, 1, 0,
-			hwidth, hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, top.uMin, top.vMax, 0, 1, 0,
-			hwidth, hheight, hdepth, 0.0, 0.0, 1.0, 1.0, top.uMin, top.vMin, 0, 1, 0,
-			-hwidth, hheight, hdepth, 1.0, 1.0, 0.0, 1.0, top.uMax, top.vMin, 0, 1, 0,
+			-hwidth, hheight, -hdepth, r,g,b,a, top.uMax, top.vMax, 0, 1, 0,
+			hwidth, hheight, -hdepth, r,g,b,a, top.uMin, top.vMax, 0, 1, 0,
+			hwidth, hheight, hdepth, r,g,b,a, top.uMin, top.vMin, 0, 1, 0,
+			-hwidth, hheight, hdepth, r,g,b,a, top.uMax, top.vMin, 0, 1, 0,
 
-			-hwidth, -hheight, -hdepth, 1.0, 0.0, 0.0, 1.0, bottom.uMax, bottom.vMax, 0, -1, 0,
-			hwidth, -hheight, -hdepth, 0.0, 1.0, 0.0, 1.0, bottom.uMin, bottom.vMax, 0, -1, 0,
-			hwidth, -hheight, hdepth, 0.0, 0.0, 1.0, 1.0, bottom.uMin, bottom.vMin, 0, -1, 0,
-			-hwidth, -hheight, hdepth, 1.0, 1.0, 0.0, 1.0, bottom.uMax, bottom.vMin, 0, -1, 0,
+			-hwidth, -hheight, -hdepth, r,g,b,a, bottom.uMax, bottom.vMax, 0, -1, 0,
+			hwidth, -hheight, -hdepth, r,g,b,a, bottom.uMin, bottom.vMax, 0, -1, 0,
+			hwidth, -hheight, hdepth, r,g,b,a, bottom.uMin, bottom.vMin, 0, -1, 0,
+			-hwidth, -hheight, hdepth, r,g,b,a, bottom.uMax, bottom.vMin, 0, -1, 0,
 		];
 
 		let indis = [
@@ -288,5 +367,67 @@ export class UvMesh {
 		}
 
 		return new UvMesh(gl, program, verts, indis, material);
+	}
+
+
+	static uv_from_obj_text(gl: WebGLRenderingContext, program: WebGLProgram, text: string, material: Material) {
+		// your code here
+		let lines: string[] = text.split(/\r?\n/);
+
+		let coordinates: number[] = [];
+		let elements: number[] = [];
+
+		for (const line of lines) {
+			const trimmed = line.trim();
+
+			if (trimmed.startsWith('v ')) {
+				const parts = trimmed.split(/\s+/);
+				let coords = new Array<number>(3);
+				parts.slice(1).map((v, i) => coords[i] = parseFloat(v));
+
+				coordinates.push(...coords, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+			}
+
+			if (trimmed.startsWith('f ')) {
+				const parts = trimmed.split(/\s+/);
+				let indis = new Array<number>(3);
+				parts.slice(1).map((v, i) => indis[i] = parseInt(v) - 1);
+
+				elements.push(...indis);
+			}
+		}
+
+		return new UvMesh(gl, program, coordinates, elements, material);
+	}
+
+	static uv_from_obj_file(
+		gl: WebGLRenderingContext,
+		file_name: string,
+		program: WebGLProgram,
+		material: Material,
+		f: (m: UvMesh) => void
+	) {
+		let request = new XMLHttpRequest();
+
+		// the function that will be called when the file is being loaded
+		request.onreadystatechange = () => {
+			// console.log( request.readyState );
+
+			if (request.readyState != 4) {
+				return;
+			}
+			if (request.status != 200) {
+				throw new Error(`HTTP error when opening .obj file: ${request.statusText}`);
+			}
+
+			// now we know the file exists and is ready
+			let loaded_mesh = UvMesh.uv_from_obj_text(gl, program, request.responseText, material);
+
+			console.log("loaded ", file_name);
+			f(loaded_mesh);
+		};
+
+		request.open("GET", file_name); // initialize request.
+		request.send(); // execute request
 	}
 }
