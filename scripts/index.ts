@@ -122,6 +122,7 @@ async function main() {
 	const metal_scale_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const metal_sphere_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
 	const blank_mat = new Material(gl, '../assets/textures/white.png', gl.LINEAR_MIPMAP_LINEAR, 1, 1, 1, 1);
+	const robo_mat = new Material(gl, '../assets/textures/robot.png', gl.LINEAR_MIPMAP_LINEAR, 1, 1, 1, 1);
 
 	const height_map = Mesh.from_heightmap(gl, program, hm, 0, 7.6, metal_scale_mat);
 	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, { r: 1, g: 1, b: 1, a: 1 }, texture_map_mat);
@@ -129,28 +130,10 @@ async function main() {
 	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
 	const triangle_mesh = UvMesh.triangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, blank_mat);
 	const rectangle_mesh = UvMesh.rectangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, 5, blank_mat);
+	const robot_mesh = UvMesh.texture_box(gl, program, 3, 3, 3, { r: 1, g: 1, b: 1, a: 1 }, robo_mat);
 
 
 	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
-	const sun_mesh = UvMesh.sphere(
-		gl, program, 16.0, 16,
-		{ r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
-		sun_material
-	);
-
-	const moon_material = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
-	const moon_mesh = UvMesh.sphere(
-		gl, program, 3.0, 16,
-		{ r: 0.7, g: 0.7, b: 0.7, a: 1.0 },
-		moon_material
-	);
-
-	const earth_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
-	const earth_mesh = UvMesh.sphere(
-		gl, program, 8.0, 16,
-		{ r: 0.88, g: 0.66, b: 0.37, a: 1.0 },
-		earth_material
-	);
 
 	const light_collection = new LightCollection();
 	const controls = Controls.start_listening();
@@ -172,10 +155,10 @@ async function main() {
 
 	//const triangle_first = new Node({x:-15,y:0,z:-10},undefined,undefined,triangle_mesh);
 
-	const triangle = new Node({ x: 0, y: 10, z: -10 }, undefined, {x:5,y:5,z:5}, triangle_mesh);
+	const triangle = new Node({ x: 0, y: 10, z: -10 }, undefined, { x: 5, y: 5, z: 5 }, triangle_mesh);
 	triangle.rotation.yaw = Math.PI * 2;
 
-	const triangle_anim = new Node({ x: 0, y: 15, z: -10 }, undefined, {x:7,y:7,z:7}, triangle_mesh);
+	const triangle_anim = new Node({ x: 0, y: 15, z: -10 }, undefined, { x: 7, y: 7, z: 7 }, triangle_mesh);
 
 	const rect = new Node({ x: -9, y: 10, z: -10 }, undefined, undefined, rectangle_mesh);
 	rect.rotation.yaw = -Math.PI / 1.9;
@@ -193,33 +176,32 @@ async function main() {
 	root.add_child(triangle_anim);
 	root.add_child(rect);
 
-	//root.add_child(triangle_first);
-	// root.add_child(metal_sphere);
-
 	const torso_mesh = UvMesh.box(gl, program, 2.5, 4, 2, { r: 0, g: 0, b: 255, a: 1 }, blank_mat);
 	const torso_mesh_bottom = UvMesh.box(gl, program, 2.5, 4, 2, { r: 0, g: 0, b: 0, a: 1 }, blank_mat);
-	const sphere_mesh = UvMesh.sphere(gl,program,5,16,{r:1,g:1,b:1,a:1},sun_material);
-	const cube_mesh = UvMesh.box(gl,program,2,2,2,{r:1,g:1,b:1,a:1},blank_mat);
+	const sphere_mesh = UvMesh.sphere(gl, program, 5, 16, { r: 1, g: 1, b: 1, a: 1 }, sun_material);
+	const cube_mesh = UvMesh.box(gl, program, 2, 2, 2, { r: 1, g: 1, b: 1, a: 1 }, blank_mat);
 
 	const robot = new Node({ x: 0, y: 0, z: -15 });
-	const torso = new Node({ x: 0, y: 0, z: 0 }, undefined, {x:1,y:1,z:1}, torso_mesh);
-	const torso_bottom = new Node ({x:0,y:-2.2,z:0},undefined,{x:1,y:0.1,z:1},torso_mesh_bottom);
+	const torso = new Node({ x: 0, y: 0, z: 0 }, undefined, { x: 1, y: 1, z: 1 }, torso_mesh);
+	const torso_bottom = new Node({ x: 0, y: -2.2, z: 0 }, undefined, { x: 1, y: 0.1, z: 1 }, torso_mesh_bottom);
 	const head = new Node({ x: 0, y: 3.0, z: 0 }, undefined, { x: 0.6, y: 0.6, z: 0.6 }, sphere_mesh);
+	const helmet = new Node({ x: 0, y: 0, z: 0 }, undefined, undefined, robot_mesh);
 
 	const left_shoulder = new Node({ x: -1.75, y: 1.25, z: 0 }, undefined, { x: 0.3, y: 0.3, z: 0.3 }, cube_mesh);
 	const right_shoulder = new Node({ x: 1.75, y: 1.25, z: 0 }, undefined, { x: 0.3, y: 0.3, z: 0.3 }, cube_mesh);
 	const left_arm = new Node({ x: 0, y: -3.5, z: 0 }, undefined, { x: 0.3, y: 2.5, z: 0.3 }, cube_mesh);
 	const right_arm = new Node({ x: 0, y: -3.5, z: 0 }, undefined, { x: 0.3, y: 2.5, z: 0.3 }, cube_mesh);
 
-	const left_hip  = new Node({ x: -0.75, y: -4.0, z: 0 }, undefined, undefined, undefined);
-	const right_hip = new Node({ x:  0.75, y: -4.0, z: 0 }, undefined, undefined, undefined);
+	const left_hip = new Node({ x: -0.75, y: -4.0, z: 0 }, undefined, undefined, undefined);
+	const right_hip = new Node({ x: 0.75, y: -4.0, z: 0 }, undefined, undefined, undefined);
 
-	const left_leg  = new Node({ x: 0, y: -2.0, z: 0 }, undefined, {x:0.4,y:2.0,z:0.3}, cube_mesh);
-	const right_leg = new Node({ x: 0, y: -2.0, z: 0 }, undefined,{x:0.4,y:2.0,z:0.3}, cube_mesh);
+	const left_leg = new Node({ x: 0, y: -2.0, z: 0 }, undefined, { x: 0.4, y: 2.0, z: 0.3 }, cube_mesh);
+	const right_leg = new Node({ x: 0, y: -2.0, z: 0 }, undefined, { x: 0.4, y: 2.0, z: 0.3 }, cube_mesh);
 
 	robot.add_child(torso);
 	robot.add_child(torso_bottom);
 	robot.add_child(head);
+	head.add_child(helmet);
 
 	//torso.add_child(head);
 	torso.add_child(left_shoulder);
@@ -239,16 +221,16 @@ async function main() {
 
 	const red_light = new PointLight(
 		{ x: 0, y: 0, z: 0 },
-		{ r: 2.0, g: 0.0, b: 0.0 }
+		{ r: 1.0, g: 0.0, b: 0.0 }
 	);
 
 	const blue_light = new PointLight(
 		{ x: 0, y: 0, z: 0 },
-		{ r: 0.0, g: 0.0, b: 2.0 }
+		{ r: 0.9, g: 3, b: 3 }
 	);
 
 	const red_light_node = new Node(
-		{ x: 8, y: 0, z: 0 },
+		{ x: 3, y: -2.0, z: -2.0 },
 		undefined,
 		undefined,
 		null,
@@ -256,7 +238,7 @@ async function main() {
 	);
 
 	const blue_light_node = new Node(
-		{ x: -8, y: 0, z: 0 },
+		{ x: 0, y: 0, z: -2 },
 		undefined,
 		undefined,
 		null,
@@ -265,7 +247,7 @@ async function main() {
 
 	metal_sphere.add_child(light_pivot);
 	light_pivot.add_child(red_light_node);
-	light_pivot.add_child(blue_light_node);
+	helmet.add_child(blue_light_node);
 
 	const sun = new AmbientLight({ x: 1.0, y: 1.0, z: 1.0 }, { r: 1.0, g: 1.0, b: 1.0 });
 	light_collection.set_ambient(sun)
@@ -277,12 +259,7 @@ async function main() {
 			undefined,
 			m);
 		root.add_child(teapot);
-	}
-	);
-
-	// root.add_child(sun);
-	// sun.add_child(earth);
-	// earth.add_child(moon);
+	});
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -300,7 +277,7 @@ async function main() {
 		previous = now;
 
 		head.rotation.yaw = Math.sin(now * 0.001) * 0.1;
-		torso.rotation.yaw += 0.15 * dt;
+		torso.rotation.yaw = Math.sin(now * 0.002) * 0.1;
 		torso_bottom.rotation.yaw = Math.sin(now * 0.002) * 0.1;
 		left_shoulder.rotation.pitch = Math.sin(now * 0.002) * 0.1;
 		right_shoulder.rotation.pitch = -Math.sin(now * 0.002) * 0.1;
