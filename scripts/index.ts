@@ -117,17 +117,18 @@ async function main() {
 		[0.6, 1.0, 1.5, 2.1, 2.7, 3.2, 3.6, 3.4, 3.7, 4.0, 4.3, 4.6, 4.4, 4.7, 5.0],
 		[0.3, 0.7, 1.2, 1.8, 2.4, 2.9, 3.3, 3.1, 3.4, 3.7, 4.0, 4.3, 4.1, 4.4, 4.7]
 	];
+
 	const texture_map_mat = new Material(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0);
 	const metal_scale_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const metal_sphere_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
-	const blank_mat = new Material(gl,'../assets/textures/white.png',gl.LINEAR_MIPMAP_LINEAR,1,1,1,1);
+	const blank_mat = new Material(gl, '../assets/textures/white.png', gl.LINEAR_MIPMAP_LINEAR, 1, 1, 1, 1);
 
 	const height_map = Mesh.from_heightmap(gl, program, hm, 0, 7.6, metal_scale_mat);
-	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4,{r:1,g:1,b:1,a:1}, texture_map_mat);
-	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3,{r:0,g:0,b:255,a:1}, blank_mat);
+	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, { r: 1, g: 1, b: 1, a: 1 }, texture_map_mat);
+	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, { r: 0, g: 0, b: 255, a: 1 }, blank_mat);
 	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
-	const triangle_mesh = UvMesh.triangle(gl,program,{r:1,g:1,b:1,a:1},5,blank_mat);
-	const rectangle_mesh = UvMesh.rectangle(gl,program,{r:1,g:1,b:1,a:1},5,blank_mat);
+	const triangle_mesh = UvMesh.triangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, 5, blank_mat);
+	const rectangle_mesh = UvMesh.rectangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, 5, blank_mat);
 
 	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const sun_mesh = UvMesh.sphere(
@@ -169,19 +170,19 @@ async function main() {
 
 	//const triangle_first = new Node({x:-15,y:0,z:-10},undefined,undefined,triangle_mesh);
 
-	const triangle = new Node({x:0, y:10,z:-10},undefined,undefined,triangle_mesh);
-	triangle.rotation.yaw= Math.PI*2;
+	const triangle = new Node({ x: 0, y: 10, z: -10 }, undefined, undefined, triangle_mesh);
+	triangle.rotation.yaw = Math.PI * 2;
 
-	const triangle_anim = new Node({x:0,y:15,z:-10},undefined,undefined,triangle_mesh);
+	const triangle_anim = new Node({ x: 0, y: 15, z: -10 }, undefined, undefined, triangle_mesh);
 
-	const rect = new Node({x: -9, y:10,z:-10},undefined,undefined,rectangle_mesh);
-	rect.rotation.yaw = -Math.PI/1.9;
+	const rect = new Node({ x: -9, y: 10, z: -10 }, undefined, undefined, rectangle_mesh);
+	rect.rotation.yaw = -Math.PI / 1.9;
 
 	const sun = new Node({ x: 6, y: 0, z: -10 }, undefined, undefined, sun_mesh);
 	const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
 	const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
 
-	let teapot:Node | null = null;
+	let teapot: Node | null = null;
 
 	root.add_child(camera);
 	root.add_child(ground);
@@ -192,18 +193,39 @@ async function main() {
 	root.add_child(triangle_anim);
 	root.add_child(rect);
 	//root.add_child(triangle_first);
+	// root.add_child(metal_sphere);
 
-	UvMesh.uv_from_obj_file(gl,'../assets/obj_files/teapot.obj',program,blank_mat,(m) => {teapot = new Node(
+	const torso_mesh = UvMesh.box(gl, program, 2.5, 4, 2, { r: 0, g: 0, b: 255, a: 1 }, blank_mat);
+
+	const robot = new Node({ x: 0, y: 0, z: -15 });
+	const torso = new Node({ x: 0, y: 0, z: 0 }, undefined, undefined, torso_mesh);
+	const head = new Node({ x: 0, y: 3.0, z: 0 }, undefined, { x: 0.6, y: 0.6, z: 0.6 }, sphere_mesh);
+
+	const left_shoulder = new Node({ x: -1.75, y: 1.25, z: 0 }, undefined, { x: 0.3, y: 0.3, z: 0.3 }, cube_mesh);
+	const right_shoulder = new Node({ x: 1.75, y: 1.25, z: 0 }, undefined, { x: 0.3, y: 0.3, z: 0.3 }, cube_mesh);
+	const left_arm = new Node({ x: 0, y: -3.5, z: 0 }, undefined, { x: 0.3, y: 2.5, z: 0.3 }, cube_mesh);
+	const right_arm = new Node({ x: 0, y: -3.5, z: 0 }, undefined, { x: 0.3, y: 2.5, z: 0.3 }, cube_mesh);
+
+	robot.add_child(torso);
+
+	torso.add_child(head);
+	torso.add_child(left_shoulder);
+	torso.add_child(right_shoulder);
+
+	left_shoulder.add_child(left_arm);
+	right_shoulder.add_child(right_arm);
+
+	root.add_child(robot);
+
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
+		teapot = new Node(
 			{ x: 15, y: 0, z: -10 },
 			undefined,
 			undefined,
 			m);
-			root.add_child(teapot);}
+		root.add_child(teapot);
+	}
 	);
-
-	root.add_child(sun);
-	sun.add_child(earth);
-	earth.add_child(moon);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -220,22 +242,22 @@ async function main() {
 		let dt = (now - previous) / 1000;
 		previous = now;
 
-		sun.rotation.yaw += 0.05 * dt;
-		earth.rotation.yaw += 0.5 * dt;
-		moon.rotation.roll += 1.0 * dt;
+		// head.rotation.yaw = Math.sin(now * 0.001) * 0.1;
+		left_shoulder.rotation.pitch = Math.sin(now * 0.002) * 0.1;
+		right_shoulder.rotation.pitch = -Math.sin(now * 0.002) * 0.1;
 
 
 
-		const spin_xy = 0.25; 
-		const spin_xz = 0.5;   
-		const spin_yz = 0.05;   
+		const spin_xy = 0.25;
+		const spin_xz = 0.5;
+		const spin_yz = 0.05;
 
-		triangle_anim.rotation.roll  += spin_xy * dt;
-		triangle_anim.rotation.yaw   += spin_xz * dt;
+		triangle_anim.rotation.roll += spin_xy * dt;
+		triangle_anim.rotation.yaw += spin_xz * dt;
 		triangle_anim.rotation.pitch += spin_yz * dt;
 
-		if(teapot !== null){
-			teapot.rotation.yaw += spin_xy*dt;
+		if (teapot !== null) {
+			teapot.rotation.yaw += spin_xy * dt;
 		}
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
