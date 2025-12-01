@@ -183,15 +183,14 @@ async function main() {
 	let teapot: Node | null = null;
 
 	root.add_child(camera);
-	// root.add_child(ground);
-	// root.add_child(texture_cube);
-	// root.add_child(grant_cube);
-
+	root.add_child(ground);
+	root.add_child(texture_cube);
+	root.add_child(grant_cube);
 	root.add_child(metal_sphere);
-
 	root.add_child(triangle);
 	root.add_child(triangle_anim);
 	root.add_child(rect);
+
 	//root.add_child(triangle_first);
 
 	metal_sphere.add_child(light_pivot);
