@@ -101,21 +101,11 @@ async function main() {
 	]);
 
 	const hm = [
-		[2.3, 1.8, 2.1, 3.4, 2.9, 3.1, 2.7, 3.5, 4.1, 3.8, 4.2, 3.9, 4.5, 4.8, 5.1],
-		[1.9, 2.4, 2.8, 3.1, 3.5, 3.8, 4.2, 4.0, 4.3, 4.6, 4.9, 5.2, 5.0, 5.3, 5.6],
-		[2.2, 2.6, 3.0, 3.6, 4.1, 4.4, 4.7, 4.5, 4.8, 5.1, 5.4, 5.7, 5.5, 5.8, 6.1],
-		[2.5, 2.9, 3.3, 3.9, 4.5, 5.0, 5.3, 5.1, 5.4, 5.7, 6.0, 6.3, 6.1, 6.4, 6.7],
-		[2.8, 3.2, 3.7, 4.3, 4.9, 5.4, 5.8, 5.6, 5.9, 6.2, 6.5, 6.8, 6.6, 6.9, 7.2],
-		[3.1, 3.5, 4.0, 4.6, 5.2, 5.7, 6.1, 6.0, 6.3, 6.6, 6.9, 7.2, 7.0, 7.3, 7.6],
-		[2.7, 3.1, 3.6, 4.2, 4.8, 5.3, 5.7, 5.5, 5.8, 6.1, 6.4, 6.7, 6.5, 6.8, 7.1],
-		[2.4, 2.8, 3.3, 3.9, 4.5, 5.0, 5.4, 5.2, 5.5, 5.8, 6.1, 6.4, 6.2, 6.5, 6.8],
-		[2.1, 2.5, 3.0, 3.6, 4.2, 4.7, 5.1, 4.9, 5.2, 5.5, 5.8, 6.1, 5.9, 6.2, 6.5],
-		[1.8, 2.2, 2.7, 3.3, 3.9, 4.4, 4.8, 4.6, 4.9, 5.2, 5.5, 5.8, 5.6, 5.9, 6.2],
-		[1.5, 1.9, 2.4, 3.0, 3.6, 4.1, 4.5, 4.3, 4.6, 4.9, 5.2, 5.5, 5.3, 5.6, 5.9],
-		[1.2, 1.6, 2.1, 2.7, 3.3, 3.8, 4.2, 4.0, 4.3, 4.6, 4.9, 5.2, 5.0, 5.3, 5.6],
-		[0.9, 1.3, 1.8, 2.4, 3.0, 3.5, 3.9, 3.7, 4.0, 4.3, 4.6, 4.9, 4.7, 5.0, 5.3],
-		[0.6, 1.0, 1.5, 2.1, 2.7, 3.2, 3.6, 3.4, 3.7, 4.0, 4.3, 4.6, 4.4, 4.7, 5.0],
-		[0.3, 0.7, 1.2, 1.8, 2.4, 2.9, 3.3, 3.1, 3.4, 3.7, 4.0, 4.3, 4.1, 4.4, 4.7]
+		[1, 2, 3, 2, 1],
+		[2, 4, 6, 4, 2],
+		[3, 6, 4, 6, 3],
+		[2, 4, 6, 4, 2],
+		[1, 2, 3, 2, 1],
 	];
 
 	const texture_map_mat = new Material(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0);
@@ -153,23 +143,42 @@ async function main() {
 	}
 
 	const root = new Node();
+	const museum = new Node();
 	const camera = new Node({ x: 0, y: 0, z: -25 });
-	const texture_cube = new Node({ x: -4.5, y: 0, z: -10 }, undefined, undefined, cube_with_textures_mesh);
-	const grant_cube = new Node({ x: 0, y: 0, z: -10 }, undefined, undefined, cube_with_grant_mesh);
+	root.add_child(camera);
 
-	const ground = new Node({ x: 0, y: 0, z: 0 }, undefined, undefined, height_map)
+	const white_light = new PointLight(
+		{ x: 0, y: 0, z: 0 },
+		{ r: 1, g: 1, b: 1 }
+	);
 
-	const metal_sphere = new Node({ x: -9, y: 0, z: -10 }, undefined, undefined, metal_sphere_mesh);
 
-	//const triangle_first = new Node({x:-15,y:0,z:-10},undefined,undefined,triangle_mesh);
+	const grant_cube = new Node({ x: -10, y: 0, z: 10 }, undefined, undefined, cube_with_grant_mesh);
+	const top_light0 = new Node({ x: -10, y: 5, z: 10 }, undefined, undefined, null, white_light);
+	museum.add_child(top_light0);
+	const texture_cube = new Node({ x: -10, y: 0, z: 5 }, undefined, undefined, cube_with_textures_mesh);
+	const top_light1 = new Node({ x: -10, y: 5, z: 5 }, undefined, undefined, null, white_light);
+	museum.add_child(top_light1);
+	const ground = new Node({ x: -10, y: 0, z: 0 }, undefined, { x: 0.5, y: 0.5, z: 0.5 }, height_map)
+	const top_light2 = new Node({ x: -10, y: 5, z: 0 }, undefined, undefined, null, white_light);
+	museum.add_child(top_light2);
+	const metal_sphere = new Node({ x: -10, y: 0, z: -5 }, undefined, undefined, metal_sphere_mesh);
+	const top_light3 = new Node({ x: -10, y: 5, z: -5 }, undefined, undefined, null, white_light);
+	museum.add_child(top_light3);
 
-	const triangle = new Node({ x: 0, y: 10, z: -10 }, undefined, { x: 5, y: 5, z: 5 }, triangle_mesh);
+	const triangle = new Node({ x: 10, y: 0, z: 10 }, undefined, { x: 4, y: 4, z: 4 }, triangle_mesh);
 	triangle.rotation.yaw = Math.PI * 2;
+	const top_light4 = new Node({ x: 10, y: 5, z: 10 }, undefined, undefined, null, white_light);
+	museum.add_child(top_light4);
 
-	const triangle_anim = new Node({ x: 0, y: 15, z: -10 }, undefined, { x: 7, y: 7, z: 7 }, triangle_mesh);
+	const triangle_anim = new Node({ x: 10, y: 0, z: 5 }, undefined, { x: 7, y: 7, z: 7 }, triangle_mesh);
+	const top_light5 = new Node({ x: 10, y: 5, z: 5 }, undefined, undefined, null, white_light);
+	museum.add_child(top_light5);
 
-	const rect = new Node({ x: -9, y: 10, z: -10 }, undefined, undefined, rectangle_mesh);
+	const rect = new Node({ x: 10, y: 0, z: 0 }, undefined, undefined, rectangle_mesh);
 	rect.rotation.yaw = -Math.PI / 1.9;
+	const top_light6 = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, null, white_light);
+	museum.add_child(top_light6);
 
 	const light_pivot = new Node({ x: 0, y: 0, z: 0 });
 
@@ -192,7 +201,7 @@ async function main() {
 	const sphere_mesh = UvMesh.sphere(gl, program, 5, 16, { r: 1, g: 1, b: 1, a: 1 }, sun_material);
 	const cube_mesh = UvMesh.box(gl, program, 2, 2, 2, { r: 1, g: 1, b: 1, a: 1 }, blank_mat);
 
-	const robot = new Node({ x: 0, y: 0, z: -15 });
+	const robot = new Node({ x: 10, y: 0, z: -5 });
 	const torso = new Node({ x: 0, y: 0, z: 0 }, undefined, { x: 1, y: 1, z: 1 }, torso_mesh);
 	const torso_bottom = new Node({ x: 0, y: -2.2, z: 0 }, undefined, { x: 1, y: 0.1, z: 1 }, torso_mesh_bottom);
 	const head = new Node({ x: 0, y: 3.0, z: 0 }, undefined, { x: 0.6, y: 0.6, z: 0.6 }, sphere_mesh);
@@ -213,22 +222,26 @@ async function main() {
 	robot.add_child(torso_bottom);
 	robot.add_child(head);
 	head.add_child(helmet);
-
-	//torso.add_child(head);
 	torso.add_child(left_shoulder);
 	torso.add_child(right_shoulder);
-
 	torso_bottom.add_child(left_hip);
 	torso_bottom.add_child(right_hip);
-
 	left_hip.add_child(left_leg);
 	right_hip.add_child(right_leg);
-
 	left_shoulder.add_child(left_arm);
 	right_shoulder.add_child(right_arm);
 
-	root.add_child(robot);
+	museum.add_child(robot);
+	museum.add_child(ground);
+	museum.add_child(texture_cube);
+	museum.add_child(grant_cube);
+
+	museum.add_child(metal_sphere);
 	metal_sphere.add_child(light_pivot);
+
+	museum.add_child(triangle);
+	museum.add_child(triangle_anim);
+	museum.add_child(rect);
 
 	const red_light = new PointLight(
 		{ x: 0, y: 0, z: 0 },
@@ -285,14 +298,26 @@ async function main() {
 	
 	
 
-	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
-		teapot = new Node(
-			{ x: 15, y: 0, z: -10 },
+	let building: Node | null = null;
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/lessCoolBuilding.obj', program, blank_mat, (m) => {
+		building = new Node(
+			{ x: 0, y: 0, z: 0 },
 			undefined,
 			undefined,
 			m);
-		root.add_child(teapot);
+		root.add_child(building);
 	});
+
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
+		teapot = new Node(
+			{ x: 10, y: -2, z: -10 },
+			undefined,
+			undefined,
+			m);
+		museum.add_child(teapot);
+	});
+	const top_light7 = new Node({ x: 10, y: 5, z: -10 }, undefined, undefined, null, white_light);
+	// museum.add_child(top_light7);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -375,7 +400,7 @@ async function main() {
 		//Render other objects
 		gl.useProgram(program);
 
-		light_collection.collect(root, Mat4.identity());
+		light_collection.collect(museum, Mat4.identity());
 		light_collection.bind_lights(gl, program);
 
 		set_uniform_matrix4(gl, program, 'projection', projection.data);
@@ -385,7 +410,7 @@ async function main() {
 		set_uniform3fv(gl, program, 'cam_pos', Object.values(camera.position));
 
 		let jobs: RenderMesh[] = [];
-		generate_render_jobs(Mat4.identity(), root, jobs);
+		generate_render_jobs(Mat4.identity(), museum, jobs);
 
 		for (let job of jobs) {
 			set_uniform_matrix4(gl, program, 'model', job.matrix.data);
