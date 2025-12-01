@@ -21,7 +21,7 @@ import {
 } from "./utils/webGl";
 import { generate_render_jobs, RenderMesh } from "./rendering/mesh"
 import { Mesh } from "./mesh/normal.ts";
-import { LightCollection, PointLight } from "./light.ts";
+import { AmbientLight, LightCollection, PointLight } from "./light.ts";
 
 const canvas = document.getElementById("mainCanvas") as HTMLCanvasElement;
 if (!canvas) {
@@ -226,6 +226,9 @@ async function main() {
 	light_pivot.add_child(red_light_node);
 	light_pivot.add_child(blue_light_node);
 
+	const sun = new AmbientLight({ x: 1.0, y: 1.0, z: 1.0 }, { r: 1.0, g: 1.0, b: 1.0 });
+	light_collection.set_ambient(sun)
+
 	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
 		teapot = new Node(
 			{ x: 15, y: 0, z: -10 },
@@ -256,8 +259,6 @@ async function main() {
 		previous = now;
 
 		light_pivot.rotation.yaw += 0.25 * dt;   // Orbit around sphere
-
-
 
 		const spin_xy = 0.25;
 		const spin_xz = 0.5;
@@ -319,10 +320,6 @@ async function main() {
 		set_uniform_matrix4(gl, program, 'projection', projection.data);
 		set_uniform_matrix4(gl, program, 'view', view.data);
 		set_uniform_matrix4(gl, program, 'model', model.data);
-
-		// TODO: use light collection for this
-		set_uniform3fv(gl, program, 'sun.direction', [1.0, 1.0, 1.0]);
-		set_uniform3fv(gl, program, 'sun.color', [1.0, 1.0, 1.0]);
 
 		set_uniform3fv(gl, program, 'cam_pos', Object.values(camera.position));
 
