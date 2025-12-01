@@ -114,6 +114,7 @@ async function main() {
 	const blank_mat = new Material(gl, '../assets/textures/white.png', gl.LINEAR_MIPMAP_LINEAR, 1, 1, 1, 1);
 	const robo_mat = new Material(gl, '../assets/textures/robot.png', gl.LINEAR_MIPMAP_LINEAR, 1, 1, 1, 1);
 	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
+	const water_mat = new Material(gl,'../assets/textures/blue_water.png',gl.LINEAR_MIPMAP_LINEAR,1.0,0.0,2.0,9.0);
 
 	const height_map = Mesh.from_heightmap(gl, program, hm, 0, 7.6, metal_scale_mat);
 	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, { r: 1, g: 1, b: 1, a: 1 }, texture_map_mat);
@@ -313,7 +314,7 @@ async function main() {
 	// 	root.add_child(building);
 	// });
 
-	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, metal_scale_mat, (m) => {
 		teapot = new Node(
 			{ x: 12, y: -2, z: -40 },
 			undefined,
@@ -324,7 +325,7 @@ async function main() {
 	const top_light7 = new Node({ x: 10, y: 5, z: -10 }, undefined, undefined, null, white_light);
 	// museum.add_child(top_light7);
 
-	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/cow.obj', program, blank_mat, (m) => {
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/cow.obj', program, water_mat, (m) => {
 		teapot = new Node(
 			{ x: 22, y: 2, z: -40 },
 			undefined,
