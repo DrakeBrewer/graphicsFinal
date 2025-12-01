@@ -150,6 +150,14 @@ async function main() {
 		earth_material
 	);
 
+	// Building material with uvImage_1 texture
+	const building_material = new Material(gl, '../assets/textures/uvImage_1.jpg', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.2, 1.5, 32.0);
+
+	// Create materials for different parts of the building using different regions of uvImage_1
+	const wood_paneling_material = new Material(gl, '../assets/textures/uvImage_1.jpg', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.3, 1.8, 16.0);
+	const tile_floor_material = new Material(gl, '../assets/textures/uvImage_1.jpg', gl.LINEAR_MIPMAP_LINEAR, 0.8, 0.4, 1.2, 8.0);
+	const interior_material = new Material(gl, '../assets/textures/uvImage_1.jpg', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.1, 2.0, 16.0);
+
 	const light_collection = new LightCollection();
 	const controls = Controls.start_listening();
 
@@ -180,9 +188,12 @@ async function main() {
 
 	const light_pivot = new Node({ x: 0, y: 0, z: 0 });
 
+	let building_walls: Node | null = null;
+	let building_floors: Node | null = null;
 	let teapot: Node | null = null;
 
 	root.add_child(camera);
+	
 	root.add_child(ground);
 	root.add_child(texture_cube);
 	root.add_child(grant_cube);
@@ -225,8 +236,30 @@ async function main() {
 	light_pivot.add_child(red_light_node);
 	light_pivot.add_child(blue_light_node);
 
-	const sun = new AmbientLight({ x: 1.0, y: 1.0, z: 1.0 }, { r: 1.0, g: 1.0, b: 1.0 });
-	light_collection.set_ambient(sun)
+	const ambient_sun = new AmbientLight({ x: 1.0, y: 1.0, z: 1.0 }, { r: 1.0, g: 1.0, b: 1.0 });
+	light_collection.set_ambient(ambient_sun)
+
+	// Load building with material separation
+	console.log("About to load building OBJ file...");
+	console.log("File path: '../assets/obj_files/lessCoolBuilding.obj'");
+	
+	// Try simpler OBJ loading first
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/lessCoolBuilding.obj', program, metal_scale_mat, (building_mesh) => {
+		console.log("Simple OBJ loaded! Creating building node...");
+		console.log("Building mesh:", building_mesh);
+		
+		const building = new Node(
+			{ x: 0, y: 0, z: -10 },
+			undefined,
+			undefined,
+			building_mesh);
+		root.add_child(building);
+		
+		console.log("Building node created and added to scene!");
+		console.log(`Building position: x=0, y=0, z=-10`);
+	});
+	
+	
 
 	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
 		teapot = new Node(
@@ -238,9 +271,6 @@ async function main() {
 	}
 	);
 
-	// root.add_child(sun);
-	// sun.add_child(earth);
-	// earth.add_child(moon);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -270,6 +300,8 @@ async function main() {
 		if (teapot !== null) {
 			teapot.rotation.yaw += spin_xy * dt;
 		}
+
+		// Building doesn't rotate - it stays stationary
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 

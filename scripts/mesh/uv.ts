@@ -68,8 +68,8 @@ export class UvMesh {
 
 	render(gl: WebGLRenderingContext) {
 		gl.frontFace(gl.CW)
-		gl.cullFace(gl.BACK);
-		//gl.enable(gl.CULL_FACE);
+		//gl.cullFace(gl.BACK);
+		gl.disable(gl.CULL_FACE); // Disable culling to see interior
 
 		gl.useProgram(this.program);
 		this.set_vertex_attrib_buffers(gl);
@@ -371,33 +371,400 @@ export class UvMesh {
 
 
 	static uv_from_obj_text(gl: WebGLRenderingContext, program: WebGLProgram, text: string, material: Material) {
-		// your code here
-		let lines: string[] = text.split(/\r?\n/);
+		const lines = text.split(/\r?\n/);
 
-		let coordinates: number[] = [];
-		let elements: number[] = [];
+		// Arrays to store parsed data from OBJ file
+		const positions: number[][] = [];     // v x y z
+		const uvs: number[][] = [];           // vt u v
+		const normals: number[][] = [];       // vn x y z
+		const faces: string[][] = [];         // f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3
 
-		for (const line of lines) {
-			const trimmed = line.trim();
+		// Parse the OBJ file line by line with better error handling
+		for (let i = 0; i < lines.length; i++) {
+			const trimmed = lines[i].trim();
+			if (!trimmed || trimmed.startsWith('#')) continue;
 
-			if (trimmed.startsWith('v ')) {
+			try {
 				const parts = trimmed.split(/\s+/);
-				let coords = new Array<number>(3);
-				parts.slice(1).map((v, i) => coords[i] = parseFloat(v));
+				if (parts.length === 0) continue;
 
-				coordinates.push(...coords, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-			}
+				const command = parts[0];
 
-			if (trimmed.startsWith('f ')) {
-				const parts = trimmed.split(/\s+/);
-				let indis = new Array<number>(3);
-				parts.slice(1).map((v, i) => indis[i] = parseInt(v) - 1);
+				switch (command) {
+					case 'v':
+						// Vertex position - ensure we have at least 3 coordinates
+						if (parts.length < 4) {
+							console.warn(`Line ${i + 1}: Incomplete vertex position, using defaults`);
+						}
+						positions.push([
+							parseFloat(parts[1]) || 0,
+							parseFloat(parts[2]) || 0,
+							parseFloat(parts[3]) || 0
+						]);
+						break;
 
-				elements.push(...indis);
+					case 'vt':
+						// Texture coordinate - ensure we have at least 2 coordinates
+						if (parts.length < 3) {
+							console.warn(`Line ${i + 1}: Incomplete UV coordinates, using defaults`);
+						}
+						uvs.push([
+							parseFloat(parts[1]) || 0,
+							parseFloat(parts[2]) || 0
+						]);
+						break;
+
+					case 'vn':
+						// Normal vector - ensure we have 3 components
+						if (parts.length < 4) {
+							console.warn(`Line ${i + 1}: Incomplete normal vector, using defaults`);
+						}
+						normals.push([
+							parseFloat(parts[1]) || 0,
+							parseFloat(parts[2]) || 1,
+							parseFloat(parts[3]) || 0
+						]);
+						break;
+
+					case 'f':
+						// Face definition
+						const faceVertices = parts.slice(1);
+						if (faceVertices.length < 3) {
+							console.warn(`Line ${i + 1}: Face with less than 3 vertices, skipping`);
+							continue;
+						}
+						faces.push(faceVertices);
+						break;
+				}
+			} catch (error) {
+				console.error(`Error parsing OBJ line ${i + 1}: "${trimmed}"`, error);
+				// Continue parsing despite errors
 			}
 		}
 
-		return new UvMesh(gl, program, coordinates, elements, material);
+		// Build final vertex array and index array with vertex deduplication
+		const finalVertices: number[] = [];
+		const finalIndices: number[] = [];
+		const vertexMap = new Map<string, number>(); // For vertex deduplication
+		let vertexIndex = 0;
+
+		// Helper function to calculate triangle normal
+		const calculateTriangleNormal = (triangle: string[]): number[] => {
+			if (triangle.length !== 3) return [0, 1, 0];
+			
+			const v1Idx = parseInt(triangle[0].split('/')[0]) - 1;
+			const v2Idx = parseInt(triangle[1].split('/')[0]) - 1;
+			const v3Idx = parseInt(triangle[2].split('/')[0]) - 1;
+
+			if (v1Idx < 0 || v2Idx < 0 || v3Idx < 0 || 
+				v1Idx >= positions.length || v2Idx >= positions.length || v3Idx >= positions.length) {
+				return [0, 1, 0];
+			}
+			
+			const p1 = positions[v1Idx];
+			const p2 = positions[v2Idx];
+			const p3 = positions[v3Idx];
+
+			// Calculate face normal using cross product
+			const u = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
+			const v = [p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]];
+
+			const normal = [
+				u[1] * v[2] - u[2] * v[1],
+				u[2] * v[0] - u[0] * v[2],
+				u[0] * v[1] - u[1] * v[0]
+			];
+
+			// Normalize
+			const length = Math.sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+			if (length > 1e-6) {
+				normal[0] /= length;
+				normal[1] /= length;
+				normal[2] /= length;
+			} else {
+				// Degenerate triangle, use default normal
+				return [0, 1, 0];
+			}
+
+			return normal;
+		};
+
+		// Process each face with better triangulation
+		for (const face of faces) {
+			const numVertices = face.length;
+			
+			// Fan triangulation for polygons with >3 vertices
+			for (let i = 1; i < numVertices - 1; i++) {
+				const triangle = [face[0], face[i], face[i + 1]];
+				const triangleNormal = calculateTriangleNormal(triangle);
+				
+				for (const vertexDef of triangle) {
+					// Parse vertex definition with better error handling
+					const indices = vertexDef.split('/');
+					
+					const posIdx = parseInt(indices[0]) - 1;
+					const uvIdx = indices[1] && indices[1] !== '' ? parseInt(indices[1]) - 1 : -1;
+					const normalIdx = indices[2] && indices[2] !== '' ? parseInt(indices[2]) - 1 : -1;
+
+					// Validate indices
+					if (posIdx < 0 || posIdx >= positions.length) {
+						console.warn(`Invalid position index: ${posIdx + 1}`);
+						continue;
+					}
+
+					// Create unique vertex key for deduplication
+					const vertexKey = `${posIdx}_${uvIdx}_${normalIdx}`;
+					
+					let index = vertexMap.get(vertexKey);
+					if (index === undefined) {
+						// New unique vertex - add it
+						index = vertexIndex++;
+						vertexMap.set(vertexKey, index);
+
+						// Add position
+						finalVertices.push(...positions[posIdx]);
+
+						// Add color (white default)
+						finalVertices.push(1.0, 1.0, 1.0, 1.0);
+
+						// Add UV coordinates
+						if (uvIdx >= 0 && uvIdx < uvs.length) {
+							finalVertices.push(...uvs[uvIdx]);
+						} else {
+							finalVertices.push(0.0, 0.0);
+						}
+
+						// Add normal
+						if (normalIdx >= 0 && normalIdx < normals.length) {
+							finalVertices.push(...normals[normalIdx]);
+						} else {
+							// Use calculated triangle normal
+							finalVertices.push(...triangleNormal);
+						}
+					}
+
+					// Add index to triangle
+					finalIndices.push(index);
+				}
+			}
+		}
+
+		console.log(`OBJ Parser Results:`);
+		console.log(`- Positions: ${positions.length}`);
+		console.log(`- UVs: ${uvs.length}`);
+		console.log(`- Normals: ${normals.length}`);
+		console.log(`- Faces: ${faces.length}`);
+		console.log(`- Final vertices: ${finalVertices.length / 12} (${finalVertices.length} floats)`);
+		console.log(`- Final indices: ${finalIndices.length}`);
+
+		return new UvMesh(gl, program, finalVertices, finalIndices, material);
+	}
+
+	static uv_from_obj_file_with_materials(
+		gl: WebGLRenderingContext,
+		file_name: string,
+		program: WebGLProgram,
+		wall_material: Material,
+		floor_material: Material,
+		f: (walls: UvMesh, floors: UvMesh) => void
+	) {
+		console.log("Starting to load OBJ file:", file_name);
+		let request = new XMLHttpRequest();
+
+		request.onreadystatechange = () => {
+			if (request.readyState != 4) {
+				return;
+			}
+			if (request.status != 200) {
+				console.error(`HTTP error when opening .obj file: ${request.statusText}`);
+				throw new Error(`HTTP error when opening .obj file: ${request.statusText}`);
+			}
+
+			console.log("OBJ file loaded, parsing...");
+			// Parse the OBJ and separate into walls and floors
+			const meshes = UvMesh.parse_obj_by_surface_type(gl, program, request.responseText, wall_material, floor_material);
+			
+			console.log("loaded ", file_name, "with separate wall/floor materials");
+			f(meshes.walls, meshes.floors);
+		};
+
+		request.open("GET", file_name);
+		request.send();
+	}
+
+	static parse_obj_by_surface_type(
+		gl: WebGLRenderingContext, 
+		program: WebGLProgram, 
+		text: string, 
+		wall_material: Material, 
+		floor_material: Material
+	): { walls: UvMesh, floors: UvMesh } {
+		let lines: string[] = text.split(/\r?\n/);
+
+		let positions: number[][] = [];
+		let uvs: number[][] = [];
+		let normals: number[][] = [];
+		let faces: string[][] = [];
+
+		// Parse OBJ data
+		for (const line of lines) {
+			const trimmed = line.trim();
+			if (!trimmed || trimmed.startsWith('#')) continue;
+
+			const parts = trimmed.split(/\s+/);
+			const command = parts[0];
+
+			switch (command) {
+				case 'v':
+					positions.push([
+						parseFloat(parts[1]) || 0,
+						parseFloat(parts[2]) || 0,
+						parseFloat(parts[3]) || 0
+					]);
+					break;
+				case 'vt':
+					uvs.push([
+						parseFloat(parts[1]) || 0,
+						parseFloat(parts[2]) || 0
+					]);
+					break;
+				case 'vn':
+					normals.push([
+						parseFloat(parts[1]) || 0,
+						parseFloat(parts[2]) || 1,
+						parseFloat(parts[3]) || 0
+					]);
+					break;
+				case 'f':
+					faces.push(parts.slice(1));
+					break;
+			}
+		}
+
+		// Separate wall and floor vertices/indices
+		const wallVertices: number[] = [];
+		const wallIndices: number[] = [];
+		const floorVertices: number[] = [];
+		const floorIndices: number[] = [];
+		
+		let wallVertexIndex = 0;
+		let floorVertexIndex = 0;
+
+		// Process each face and determine if it's a wall or floor
+		for (const face of faces) {
+			const numVertices = face.length;
+			
+			for (let i = 1; i < numVertices - 1; i++) {
+				const triangle = [face[0], face[i], face[i + 1]];
+				
+				// Calculate face normal to determine if it's a floor or wall
+				const faceNormal = UvMesh.calculateTriangleNormal(triangle, positions);
+				const isFloor = Math.abs(faceNormal[1]) > 0.7; // Y component > 0.7 means mostly horizontal
+				
+				// Choose target arrays based on surface type
+				const targetVertices = isFloor ? floorVertices : wallVertices;
+				const targetIndices = isFloor ? floorIndices : wallIndices;
+				const vertexCounter = isFloor ? floorVertexIndex : wallVertexIndex;
+				
+				for (const vertexDef of triangle) {
+					const indices = vertexDef.split('/');
+					const posIdx = parseInt(indices[0]) - 1;
+					const uvIdx = indices[1] ? parseInt(indices[1]) - 1 : -1;
+					const normalIdx = indices[2] ? parseInt(indices[2]) - 1 : -1;
+
+					// Add position
+					if (posIdx >= 0 && posIdx < positions.length) {
+						targetVertices.push(...positions[posIdx]);
+					} else {
+						targetVertices.push(0, 0, 0);
+					}
+
+					// Add color
+					targetVertices.push(1.0, 1.0, 1.0, 1.0);
+
+					// Add UV coordinates - modify based on surface type
+					if (uvIdx >= 0 && uvIdx < uvs.length) {
+						let u = uvs[uvIdx][0];
+						let v = uvs[uvIdx][1];
+						
+						if (isFloor) {
+							// Map floor UVs to tile region (bottom half of texture)
+							v = v * 0.5 + 0.5; // Scale to bottom half
+						} else {
+							// Map wall UVs to wood paneling region (top half of texture) 
+							v = v * 0.5; // Scale to top half
+						}
+						
+						targetVertices.push(u, v);
+					} else {
+						targetVertices.push(0.0, 0.0);
+					}
+
+					// Add normal
+					if (normalIdx >= 0 && normalIdx < normals.length) {
+						targetVertices.push(...normals[normalIdx]);
+					} else {
+						targetVertices.push(...faceNormal);
+					}
+
+					targetIndices.push(vertexCounter);
+				}
+				
+				// Update vertex counters
+				if (isFloor) {
+					floorVertexIndex += 3;
+				} else {
+					wallVertexIndex += 3;
+				}
+			}
+		}
+
+		console.log(`Separated building: ${wallVertices.length/12} wall vertices, ${floorVertices.length/12} floor vertices`);
+
+		return {
+			walls: new UvMesh(gl, program, wallVertices, wallIndices, wall_material),
+			floors: new UvMesh(gl, program, floorVertices, floorIndices, floor_material)
+		};
+	}
+
+	static calculateTriangleNormal(triangle: string[], positions: number[][]): number[] {
+		try {
+			const v1Idx = parseInt(triangle[0].split('/')[0]) - 1;
+			const v2Idx = parseInt(triangle[1].split('/')[0]) - 1;
+			const v3Idx = parseInt(triangle[2].split('/')[0]) - 1;
+
+			if (v1Idx >= 0 && v2Idx >= 0 && v3Idx >= 0 && 
+				v1Idx < positions.length && v2Idx < positions.length && v3Idx < positions.length) {
+				
+				const p1 = positions[v1Idx];
+				const p2 = positions[v2Idx];
+				const p3 = positions[v3Idx];
+
+				// Calculate vectors from p1 to p2 and p1 to p3
+				const u = [p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]];
+				const v = [p3[0] - p1[0], p3[1] - p1[1], p3[2] - p1[2]];
+
+				// Cross product u × v
+				const normal = [
+					u[1] * v[2] - u[2] * v[1],
+					u[2] * v[0] - u[0] * v[2],
+					u[0] * v[1] - u[1] * v[0]
+				];
+
+				// Normalize with better epsilon check
+				const length = Math.sqrt(normal[0] * normal[0] + normal[1] * normal[1] + normal[2] * normal[2]);
+				if (length > 1e-6) {
+					normal[0] /= length;
+					normal[1] /= length;
+					normal[2] /= length;
+					return normal;
+				}
+			}
+		} catch (error) {
+			console.warn('Error calculating triangle normal:', error);
+		}
+		
+		return [0, 1, 0]; // default up normal
 	}
 
 	static uv_from_obj_file(
