@@ -23,8 +23,8 @@ export class PointLight extends Light {
 
 export class AmbientLight extends Light {
 	bind(gl: WebGLRenderingContext, program: WebGLProgram) {
-		set_uniform3fv(gl, program, `ambient_light.position`, Object.values(this.position));
-		set_uniform3fv(gl, program, `ambient_light.color`, Object.values(this.color));
+		set_uniform3fv(gl, program, `sun.direction`, Object.values(this.position));
+		set_uniform3fv(gl, program, `sun.color`, Object.values(this.color));
 	}
 }
 
