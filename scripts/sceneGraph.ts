@@ -1,4 +1,5 @@
 import Camera from "./camera";
+import type { PointLight } from "./light";
 import Mat4 from "./utils/matrix";
 import Vec4 from "./utils/vertex";
 
@@ -26,12 +27,14 @@ class Node {
 	scale: Scale;
 	children: Node[];
 	data: unknown | null;
+	light: PointLight | null;
 
 	constructor(
 		position?: Position,
 		rotation?: Rotation,
 		scale?: Scale,
-		data: unknown | null = null
+		data: unknown | null = null,
+		light?: PointLight | null
 	) {
 		this.position = position ?? { x: 0, y: 0, z: 0 };
 		this.rotation = rotation ?? { pitch: 0, roll: 0, yaw: 0 };
@@ -39,6 +42,7 @@ class Node {
 
 		this.children = [];
 		this.data = data;
+		this.light = light ?? null;
 	}
 
 	add_child(child: Node) {

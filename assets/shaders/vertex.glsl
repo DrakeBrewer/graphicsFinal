@@ -3,9 +3,11 @@
 // https://webglfundamentals.org/webgl/lessons/
 precision mediump float;
 
+const int MAX_LIGHTS = 16;
+
 struct PointLight {
-    vec3 position;
-    vec3 color;
+	vec3 position;
+	vec3 color;
 };
 
 struct AmbientLight {
@@ -19,6 +21,9 @@ struct Material {
 	float specular;
 	float shininess;
 };
+
+uniform PointLight uPointLights[MAX_LIGHTS];
+uniform int uNumPointLights;
 
 in vec4 coordinates;
 in vec4 color;
@@ -36,7 +41,6 @@ uniform mat4 projection;
 uniform Material material;
 
 uniform AmbientLight sun;
-uniform PointLight point_light;
 uniform vec3 cam_pos;
 
 vec3 diff_color(vec3 normal_vec, vec3 direction, vec3 color, float mat_diffuse) {
@@ -57,31 +61,39 @@ vec3 spec_color(
 }
 
 void main() {
-    vec3 coords_tx = (model * coordinates).xyz;
-    vec3 normal_tx = normalize(mat3(model) * normal);
+	vec3 coords_tx = (model * coordinates).xyz;
+	vec3 normal_tx = normalize(mat3(model) * normal);
 
-    vec3 view_dir = normalize(cam_pos - coords_tx);
+	vec3 view_dir = normalize(cam_pos - coords_tx);
 
-    vec3 sun_ambient = vec3(material.ambient);
-    vec3 sun_diffuse = diff_color(normal_tx, sun.direction, sun.color, material.diffuse);
-    vec3 sun_specular = spec_color(normal_tx, sun.direction, sun.color, view_dir, material.shininess, material.specular);
+	vec3 sun_ambient = vec3(material.ambient);
+	vec3 sun_diffuse = diff_color(normal_tx, sun.direction, sun.color, material.diffuse);
+	vec3 sun_specular = spec_color(normal_tx, sun.direction, sun.color, view_dir, material.shininess, material.specular);
 
-    vec3 point_dir = normalize(point_light.position - coords_tx);
+	vec3 final_color = sun_ambient + sun_diffuse + sun_specular;
+	for (int i = 0; i < MAX_LIGHTS; i++) {
+		if (i >= uNumPointLights) {
+			break;
+		}
 
-    // https://webgl.brown37.net/10_lights/07_lights_attenuation.html
-    float distance = length(point_light.position - coords_tx);
-    float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.042 * pow(distance, 2.0));
+		vec3 point_dir = normalize(uPointLights[i].position - coords_tx);
 
-    vec3 point_diffuse = diff_color(normal, point_dir, point_light.color, material.diffuse) * attenuation;
-    vec3 point_specular = spec_color(
-		normal_tx, point_dir,
-		point_light.color, view_dir,
-		material.shininess, material.specular
-	) * attenuation;
+		// https://webgl.brown37.net/10_lights/07_lights_attenuation.html
+		float distance = length(uPointLights[i].position - coords_tx);
+		float attenuation = 1.0 / (1.0 + 0.09 * distance + 0.042 * pow(distance, 2.0));
 
-    vec3 final_color = sun_ambient + sun_diffuse + sun_specular + point_diffuse + point_specular;
-    vColor = vec4(final_color, 1.0) * color;
+		vec3 point_diffuse = diff_color(normal_tx, point_dir, uPointLights[i].color, material.diffuse) * attenuation;
+		vec3 point_specular = spec_color(
+			normal_tx, point_dir,
+			uPointLights[i].color, view_dir,
+			material.shininess, material.specular
+		) * attenuation;
 
-    gl_Position = projection * view * model * coordinates;
-    v_uv = uv;
+		final_color += point_diffuse + point_specular;
+	}
+
+	vColor = vec4(final_color, 1.0) * color;
+
+	gl_Position = projection * view * model * coordinates;
+	v_uv = uv;
 }

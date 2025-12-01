@@ -21,6 +21,7 @@ import {
 } from "./utils/webGl";
 import { generate_render_jobs, RenderMesh } from "./rendering/mesh"
 import { Mesh } from "./mesh/normal.ts";
+import { AmbientLight, LightCollection, PointLight } from "./light.ts";
 
 const canvas = document.getElementById("mainCanvas") as HTMLCanvasElement;
 if (!canvas) {
@@ -79,7 +80,6 @@ async function main() {
 	gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 12, 0);
 
 	gl.bindVertexArray(null);
-
 
 	const vertex_src = "../assets/shaders/vertex.glsl";
 	const fragment_src = "../assets/shaders/fragment.glsl";
@@ -152,6 +152,7 @@ async function main() {
 		earth_material
 	);
 
+	const light_collection = new LightCollection();
 	const controls = Controls.start_listening();
 
 	const perspective = {
@@ -179,9 +180,7 @@ async function main() {
 	const rect = new Node({ x: -9, y: 10, z: -10 }, undefined, undefined, rectangle_mesh);
 	rect.rotation.yaw = -Math.PI / 1.9;
 
-	const sun = new Node({ x: 6, y: 0, z: -10 }, undefined, undefined, sun_mesh);
-	const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
-	const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
+	const light_pivot = new Node({ x: 0, y: 0, z: 0 });
 
 	let teapot: Node | null = null;
 
@@ -193,6 +192,7 @@ async function main() {
 	root.add_child(triangle);
 	root.add_child(triangle_anim);
 	root.add_child(rect);
+
 	//root.add_child(triangle_first);
 	// root.add_child(metal_sphere);
 
@@ -235,6 +235,40 @@ async function main() {
 	right_shoulder.add_child(right_arm);
 
 	root.add_child(robot);
+	metal_sphere.add_child(light_pivot);
+
+	const red_light = new PointLight(
+		{ x: 0, y: 0, z: 0 },
+		{ r: 2.0, g: 0.0, b: 0.0 }
+	);
+
+	const blue_light = new PointLight(
+		{ x: 0, y: 0, z: 0 },
+		{ r: 0.0, g: 0.0, b: 2.0 }
+	);
+
+	const red_light_node = new Node(
+		{ x: 8, y: 0, z: 0 },
+		undefined,
+		undefined,
+		null,
+		red_light
+	);
+
+	const blue_light_node = new Node(
+		{ x: -8, y: 0, z: 0 },
+		undefined,
+		undefined,
+		null,
+		blue_light
+	);
+
+	metal_sphere.add_child(light_pivot);
+	light_pivot.add_child(red_light_node);
+	light_pivot.add_child(blue_light_node);
+
+	const sun = new AmbientLight({ x: 1.0, y: 1.0, z: 1.0 }, { r: 1.0, g: 1.0, b: 1.0 });
+	light_collection.set_ambient(sun)
 
 	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
 		teapot = new Node(
@@ -245,6 +279,10 @@ async function main() {
 		root.add_child(teapot);
 	}
 	);
+
+	// root.add_child(sun);
+	// sun.add_child(earth);
+	// earth.add_child(moon);
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
@@ -269,8 +307,7 @@ async function main() {
 
 		left_hip.rotation.pitch = Math.sin(now * 0.002) * 0.1;
 		right_hip.rotation.pitch = -Math.sin(now * 0.002) * 0.1;
-
-
+		light_pivot.rotation.yaw += 0.25 * dt;   // Orbit around sphere
 
 		const spin_xy = 0.25;
 		const spin_xz = 0.5;
@@ -326,14 +363,12 @@ async function main() {
 		//Render other objects
 		gl.useProgram(program);
 
+		light_collection.collect(root, Mat4.identity());
+		light_collection.bind_lights(gl, program);
+
 		set_uniform_matrix4(gl, program, 'projection', projection.data);
 		set_uniform_matrix4(gl, program, 'view', view.data);
 		set_uniform_matrix4(gl, program, 'model', model.data);
-
-		set_uniform3fv(gl, program, 'sun.direction', [1.0, 0.0, 0.0]);
-		set_uniform3fv(gl, program, 'sun.color', [1.0, 1.0, 1.0]);
-		set_uniform3fv(gl, program, 'point_light.position', [-5.0, -5.0, -2.0]);
-		set_uniform3fv(gl, program, 'point_light.color', [1.0, 0.0, 0.0]);
 
 		set_uniform3fv(gl, program, 'cam_pos', Object.values(camera.position));
 
@@ -345,6 +380,7 @@ async function main() {
 			job.mesh.render(gl);
 		}
 
+		// Handle mouse updates in render loop for smooth turning
 		const mouseDelta = controls.get_mouse_delta();
 		if (mouseDelta.x !== 0 || mouseDelta.y !== 0) {
 			camera.add_yaw(mouseDelta.x * MOUSE_SENSITIVITY * dt);
@@ -373,8 +409,6 @@ async function main() {
 		}
 
 	}
-
-
 
 	window.addEventListener("resize", onResize)
 	window.requestAnimationFrame(render);
