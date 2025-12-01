@@ -117,6 +117,7 @@ async function main() {
 		[0.6, 1.0, 1.5, 2.1, 2.7, 3.2, 3.6, 3.4, 3.7, 4.0, 4.3, 4.6, 4.4, 4.7, 5.0],
 		[0.3, 0.7, 1.2, 1.8, 2.4, 2.9, 3.3, 3.1, 3.4, 3.7, 4.0, 4.3, 4.1, 4.4, 4.7]
 	];
+
 	const texture_map_mat = new Material(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0);
 	const metal_scale_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const metal_sphere_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
@@ -126,8 +127,9 @@ async function main() {
 	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, { r: 1, g: 1, b: 1, a: 1 }, texture_map_mat);
 	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, { r: 0, g: 0, b: 255, a: 1 }, blank_mat);
 	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
-	const triangle_mesh = UvMesh.triangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, 5, blank_mat);
+	const triangle_mesh = UvMesh.triangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, blank_mat);
 	const rectangle_mesh = UvMesh.rectangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, 5, blank_mat);
+
 
 	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const sun_mesh = UvMesh.sphere(
@@ -170,10 +172,10 @@ async function main() {
 
 	//const triangle_first = new Node({x:-15,y:0,z:-10},undefined,undefined,triangle_mesh);
 
-	const triangle = new Node({ x: 0, y: 10, z: -10 }, undefined, undefined, triangle_mesh);
+	const triangle = new Node({ x: 0, y: 10, z: -10 }, undefined, {x:5,y:5,z:5}, triangle_mesh);
 	triangle.rotation.yaw = Math.PI * 2;
 
-	const triangle_anim = new Node({ x: 0, y: 15, z: -10 }, undefined, undefined, triangle_mesh);
+	const triangle_anim = new Node({ x: 0, y: 15, z: -10 }, undefined, {x:7,y:7,z:7}, triangle_mesh);
 
 	const rect = new Node({ x: -9, y: 10, z: -10 }, undefined, undefined, rectangle_mesh);
 	rect.rotation.yaw = -Math.PI / 1.9;
@@ -192,7 +194,47 @@ async function main() {
 	root.add_child(rect);
 
 	//root.add_child(triangle_first);
+	// root.add_child(metal_sphere);
 
+	const torso_mesh = UvMesh.box(gl, program, 2.5, 4, 2, { r: 0, g: 0, b: 255, a: 1 }, blank_mat);
+	const torso_mesh_bottom = UvMesh.box(gl, program, 2.5, 4, 2, { r: 0, g: 0, b: 0, a: 1 }, blank_mat);
+	const sphere_mesh = UvMesh.sphere(gl,program,5,16,{r:1,g:1,b:1,a:1},sun_material);
+	const cube_mesh = UvMesh.box(gl,program,2,2,2,{r:1,g:1,b:1,a:1},blank_mat);
+
+	const robot = new Node({ x: 0, y: 0, z: -15 });
+	const torso = new Node({ x: 0, y: 0, z: 0 }, undefined, {x:1,y:1,z:1}, torso_mesh);
+	const torso_bottom = new Node ({x:0,y:-2.2,z:0},undefined,{x:1,y:0.1,z:1},torso_mesh_bottom);
+	const head = new Node({ x: 0, y: 3.0, z: 0 }, undefined, { x: 0.6, y: 0.6, z: 0.6 }, sphere_mesh);
+
+	const left_shoulder = new Node({ x: -1.75, y: 1.25, z: 0 }, undefined, { x: 0.3, y: 0.3, z: 0.3 }, cube_mesh);
+	const right_shoulder = new Node({ x: 1.75, y: 1.25, z: 0 }, undefined, { x: 0.3, y: 0.3, z: 0.3 }, cube_mesh);
+	const left_arm = new Node({ x: 0, y: -3.5, z: 0 }, undefined, { x: 0.3, y: 2.5, z: 0.3 }, cube_mesh);
+	const right_arm = new Node({ x: 0, y: -3.5, z: 0 }, undefined, { x: 0.3, y: 2.5, z: 0.3 }, cube_mesh);
+
+	const left_hip  = new Node({ x: -0.75, y: -4.0, z: 0 }, undefined, undefined, undefined);
+	const right_hip = new Node({ x:  0.75, y: -4.0, z: 0 }, undefined, undefined, undefined);
+
+	const left_leg  = new Node({ x: 0, y: -2.0, z: 0 }, undefined, {x:0.4,y:2.0,z:0.3}, cube_mesh);
+	const right_leg = new Node({ x: 0, y: -2.0, z: 0 }, undefined,{x:0.4,y:2.0,z:0.3}, cube_mesh);
+
+	robot.add_child(torso);
+	robot.add_child(torso_bottom);
+	robot.add_child(head);
+
+	//torso.add_child(head);
+	torso.add_child(left_shoulder);
+	torso.add_child(right_shoulder);
+
+	torso_bottom.add_child(left_hip);
+	torso_bottom.add_child(right_hip);
+
+	left_hip.add_child(left_leg);
+	right_hip.add_child(right_leg);
+
+	left_shoulder.add_child(left_arm);
+	right_shoulder.add_child(right_arm);
+
+	root.add_child(robot);
 	metal_sphere.add_child(light_pivot);
 
 	const red_light = new PointLight(
@@ -257,6 +299,14 @@ async function main() {
 		let dt = (now - previous) / 1000;
 		previous = now;
 
+		head.rotation.yaw = Math.sin(now * 0.001) * 0.1;
+		torso.rotation.yaw += 0.15 * dt;
+		torso_bottom.rotation.yaw = Math.sin(now * 0.002) * 0.1;
+		left_shoulder.rotation.pitch = Math.sin(now * 0.002) * 0.1;
+		right_shoulder.rotation.pitch = -Math.sin(now * 0.002) * 0.1;
+
+		left_hip.rotation.pitch = Math.sin(now * 0.002) * 0.1;
+		right_hip.rotation.pitch = -Math.sin(now * 0.002) * 0.1;
 		light_pivot.rotation.yaw += 0.25 * dt;   // Orbit around sphere
 
 		const spin_xy = 0.25;
