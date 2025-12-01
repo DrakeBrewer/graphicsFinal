@@ -164,7 +164,6 @@ export class UvMesh {
 		gl: WebGL2RenderingContext,
 		program: WebGLProgram,
 		color: Color,
-		size: number,
 		material: Material,
 	) {
 		let r = color.r;
@@ -174,11 +173,11 @@ export class UvMesh {
 
 		let verts = [
 		//Bottom Left 
-		-0.5*size, -0.25*size, 0.0*size,  r, 0.0, 0.0, a, 0.0, 0.0, 0.0,0.0,-1.0,
+		-0.5, -0.25, 0.0,  r, 0.0, 0.0, a, 0.0, 0.0, 0.0,0.0,-1.0,
 		//Bottom Right
-		0.0*size, 0.6*size, 0.0*size,  0.0, g, 0.0, a, 0.5, 1.0, 0.0, 0.0, -1.0,
+		0.0, 0.6, 0.0,  0.0, g, 0.0, a, 0.5, 1.0, 0.0, 0.0, -1.0,
 		//Top Right
-		0.5*size, -0.25*size, 0.0*size,  0.0, 0.0, b, a, 1.0, 0.0, 0.0, 0.0, -1.0,
+		0.5, -0.25, 0.0,  0.0, 0.0, b, a, 1.0, 0.0, 0.0, 0.0, -1.0,
 
 		];
 
