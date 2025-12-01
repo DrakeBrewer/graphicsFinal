@@ -113,17 +113,18 @@ async function main() {
 	const metal_sphere_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
 	const blank_mat = new Material(gl, '../assets/textures/white.png', gl.LINEAR_MIPMAP_LINEAR, 1, 1, 1, 1);
 	const robo_mat = new Material(gl, '../assets/textures/robot.png', gl.LINEAR_MIPMAP_LINEAR, 1, 1, 1, 1);
+	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 
 	const height_map = Mesh.from_heightmap(gl, program, hm, 0, 7.6, metal_scale_mat);
 	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, { r: 1, g: 1, b: 1, a: 1 }, texture_map_mat);
-	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, { r: 0, g: 0, b: 255, a: 1 }, blank_mat);
+	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, { r: 1, g: 1, b: 1, a: 1 }, sun_material);
 	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
 	const triangle_mesh = UvMesh.triangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, blank_mat);
 	const rectangle_mesh = UvMesh.rectangle(gl, program, { r: 1, g: 1, b: 1, a: 1 }, 5, blank_mat);
 	const robot_mesh = UvMesh.texture_box(gl, program, 3, 3, 3, { r: 1, g: 1, b: 1, a: 1 }, robo_mat);
 
 
-	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
+	//const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 
 	// Building material with uvImage_1 texture
 	const building_material = new Material(gl, '../assets/textures/uvImage_1.jpg', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.2, 1.5, 32.0);
@@ -153,31 +154,34 @@ async function main() {
 	);
 
 
-	const grant_cube = new Node({ x: -10, y: 0, z: 10 }, undefined, undefined, cube_with_grant_mesh);
-	const top_light0 = new Node({ x: -10, y: 5, z: 10 }, undefined, undefined, null, white_light);
+	const grant_cube = new Node({ x: -11.75, y: 0, z: -10 }, undefined, undefined, cube_with_grant_mesh);
+	const top_light0 = new Node({ x: -11.75, y: 5, z: -10 }, undefined, undefined, null, white_light);
 	museum.add_child(top_light0);
-	const texture_cube = new Node({ x: -10, y: 0, z: 5 }, undefined, undefined, cube_with_textures_mesh);
-	const top_light1 = new Node({ x: -10, y: 5, z: 5 }, undefined, undefined, null, white_light);
+
+	const texture_cube = new Node({ x: -11.75, y: 0, z: -40 }, undefined, undefined, cube_with_textures_mesh);
+	const top_light1 = new Node({ x: -11.75, y: 5, z: -40 }, undefined, undefined, null, white_light);
 	museum.add_child(top_light1);
-	const ground = new Node({ x: -10, y: 0, z: 0 }, undefined, { x: 0.5, y: 0.5, z: 0.5 }, height_map)
-	const top_light2 = new Node({ x: -10, y: 5, z: 0 }, undefined, undefined, null, white_light);
+
+	const ground = new Node({ x: -22.75, y: -3, z: -10 }, undefined, { x: 0.5, y: 0.5, z: 0.5 }, height_map)
+	const top_light2 = new Node({ x: -22.75, y: 5, z: -10 }, undefined, undefined, null, white_light);
 	museum.add_child(top_light2);
-	const metal_sphere = new Node({ x: -10, y: 0, z: -5 }, undefined, undefined, metal_sphere_mesh);
-	const top_light3 = new Node({ x: -10, y: 5, z: -5 }, undefined, undefined, null, white_light);
+
+	const metal_sphere = new Node({ x: -22.75, y: 0, z: -40 }, undefined, undefined, metal_sphere_mesh);
+	const top_light3 = new Node({ x: -22.75, y: 5, z: -40 }, undefined, undefined, null, white_light);
 	museum.add_child(top_light3);
 
-	const triangle = new Node({ x: 10, y: 0, z: 10 }, undefined, { x: 4, y: 4, z: 4 }, triangle_mesh);
-	triangle.rotation.yaw = Math.PI * 2;
-	const top_light4 = new Node({ x: 10, y: 5, z: 10 }, undefined, undefined, null, white_light);
+	const triangle = new Node({ x: 0, y: 0, z: -10 }, undefined, { x: 4, y: 4, z: 4 }, triangle_mesh);
+	//triangle.rotation.yaw = Math.PI * 2;
+	const top_light4 = new Node({ x: 0, y: 5, z: -10 }, undefined, undefined, null, white_light);
 	museum.add_child(top_light4);
 
-	const triangle_anim = new Node({ x: 10, y: 0, z: 5 }, undefined, { x: 7, y: 7, z: 7 }, triangle_mesh);
-	const top_light5 = new Node({ x: 10, y: 5, z: 5 }, undefined, undefined, null, white_light);
+	const triangle_anim = new Node({ x: 0, y: 1, z: -40 }, undefined, { x: 7, y: 7, z: 7 }, triangle_mesh);
+	const top_light5 = new Node({ x: 0, y: 5, z: -40 }, undefined, undefined, null, white_light);
 	museum.add_child(top_light5);
 
-	const rect = new Node({ x: 10, y: 0, z: 0 }, undefined, undefined, rectangle_mesh);
-	rect.rotation.yaw = -Math.PI / 1.9;
-	const top_light6 = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, null, white_light);
+	const rect = new Node({ x: 12, y: 0, z: -10 }, undefined, undefined, rectangle_mesh);
+	//rect.rotation.yaw = -Math.PI / 1.9;
+	const top_light6 = new Node({ x: 11, y: 5, z: -10 }, undefined, undefined, null, white_light);
 	museum.add_child(top_light6);
 
 	const light_pivot = new Node({ x: 0, y: 0, z: 0 });
@@ -201,7 +205,7 @@ async function main() {
 	const sphere_mesh = UvMesh.sphere(gl, program, 5, 16, { r: 1, g: 1, b: 1, a: 1 }, sun_material);
 	const cube_mesh = UvMesh.box(gl, program, 2, 2, 2, { r: 1, g: 1, b: 1, a: 1 }, blank_mat);
 
-	const robot = new Node({ x: 10, y: 0, z: -5 });
+	const robot = new Node({ x: 23.5, y: 0, z: -10 });
 	const torso = new Node({ x: 0, y: 0, z: 0 }, undefined, { x: 1, y: 1, z: 1 }, torso_mesh);
 	const torso_bottom = new Node({ x: 0, y: -2.2, z: 0 }, undefined, { x: 1, y: 0.1, z: 1 }, torso_mesh_bottom);
 	const head = new Node({ x: 0, y: 3.0, z: 0 }, undefined, { x: 0.6, y: 0.6, z: 0.6 }, sphere_mesh);
@@ -273,24 +277,24 @@ async function main() {
 	light_pivot.add_child(red_light_node);
 	helmet.add_child(blue_light_node);
 
-	const ambient_sun = new AmbientLight({ x: 1.0, y: 1.0, z: 1.0 }, { r: 1.0, g: 1.0, b: 1.0 });
-	light_collection.set_ambient(ambient_sun)
+	const ambient_sun = new AmbientLight({ x: 0, y: -10, z: -15 }, { r: 1, g: 1, b: 1 });
+	//light_collection.set_ambient(ambient_sun)
 
 	// Load building with material separation
 	console.log("About to load building OBJ file...");
 	console.log("File path: '../assets/obj_files/lessCoolBuilding.obj'");
 	
 	// Try simpler OBJ loading first
-	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/lessCoolBuilding.obj', program, metal_scale_mat, (building_mesh) => {
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/lessCoolBuilding.obj', program, interior_material, (building_mesh) => {
 		console.log("Simple OBJ loaded! Creating building node...");
 		console.log("Building mesh:", building_mesh);
 		
 		const building = new Node(
-			{ x: 0, y: 0, z: -10 },
+			{ x: 0, y: -5, z: -25 },
 			undefined,
 			{x:4,y:4,z:4},
 			building_mesh);
-		root.add_child(building);
+		museum.add_child(building);
 		
 		console.log("Building node created and added to scene!");
 		console.log(`Building position: x=0, y=0, z=-10`);
@@ -298,19 +302,19 @@ async function main() {
 	
 	
 
-	let building: Node | null = null;
-	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/lessCoolBuilding.obj', program, blank_mat, (m) => {
-		building = new Node(
-			{ x: 0, y: 0, z: 0 },
-			undefined,
-			undefined,
-			m);
-		root.add_child(building);
-	});
+	// let building: Node | null = null;
+	// UvMesh.uv_from_obj_file(gl, '../assets/obj_files/lessCoolBuilding.obj', program, blank_mat, (m) => {
+	// 	building = new Node(
+	// 		{ x: 0, y: 0, z: 0 },
+	// 		undefined,
+	// 		undefined,
+	// 		m);
+	// 	root.add_child(building);
+	// });
 
 	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/teapot.obj', program, blank_mat, (m) => {
 		teapot = new Node(
-			{ x: 10, y: -2, z: -10 },
+			{ x: 12, y: -2, z: -40 },
 			undefined,
 			undefined,
 			m);
@@ -347,6 +351,11 @@ async function main() {
 		const spin_xy = 0.25;
 		const spin_xz = 0.5;
 		const spin_yz = 0.05;
+
+		grant_cube.rotation.yaw += spin_xy *dt;
+		grant_cube.rotation.roll += spin_xy * dt;
+		texture_cube.rotation.yaw += spin_xy *dt;
+		texture_cube.rotation.roll += spin_xy * dt;
 
 		triangle_anim.rotation.roll += spin_xy * dt;
 		triangle_anim.rotation.yaw += spin_xz * dt;

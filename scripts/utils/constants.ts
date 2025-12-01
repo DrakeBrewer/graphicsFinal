@@ -4,7 +4,7 @@ export const DESIRED_MSPT = 1000.0 / DESIRED_TICK_RATE;
 export const ROTATION_SPEED = 0.2;
 export const ROTATION_SPEED_PER_FRAME = ROTATION_SPEED / DESIRED_TICK_RATE;
 
-export const FLY_SPEED = 2.5;
+export const FLY_SPEED = 6.5;
 export const FLY_SPEED_PER_FRAME = FLY_SPEED / DESIRED_TICK_RATE;
 
 export const MOUSE_SENSITIVITY = 0.1;
