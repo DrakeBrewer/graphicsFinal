@@ -275,7 +275,7 @@ async function main() {
 		const building = new Node(
 			{ x: 0, y: 0, z: -10 },
 			undefined,
-			undefined,
+			{x:4,y:4,z:4},
 			building_mesh);
 		root.add_child(building);
 		
