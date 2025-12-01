@@ -188,6 +188,7 @@ async function main() {
 	// root.add_child(grant_cube);
 
 	root.add_child(metal_sphere);
+
 	root.add_child(triangle);
 	root.add_child(triangle_anim);
 	root.add_child(rect);
@@ -197,16 +198,16 @@ async function main() {
 
 	const red_light = new PointLight(
 		{ x: 0, y: 0, z: 0 },
-		{ r: 1.0, g: 0.0, b: 0.0 }
+		{ r: 2.0, g: 0.0, b: 0.0 }
 	);
 
 	const blue_light = new PointLight(
 		{ x: 0, y: 0, z: 0 },
-		{ r: 0.0, g: 0.0, b: 1.0 }
+		{ r: 0.0, g: 0.0, b: 2.0 }
 	);
 
 	const red_light_node = new Node(
-		{ x: -8, y: 0, z: 0 },
+		{ x: 8, y: 0, z: 0 },
 		undefined,
 		undefined,
 		null,
@@ -214,13 +215,14 @@ async function main() {
 	);
 
 	const blue_light_node = new Node(
-		{ x: 8, y: 0, z: 0 },
+		{ x: -8, y: 0, z: 0 },
 		undefined,
 		undefined,
 		null,
 		blue_light
 	);
 
+	metal_sphere.add_child(light_pivot);
 	light_pivot.add_child(red_light_node);
 	light_pivot.add_child(blue_light_node);
 
@@ -253,7 +255,7 @@ async function main() {
 		let dt = (now - previous) / 1000;
 		previous = now;
 
-		light_pivot.rotation.yaw += 1.0 * dt;   // Orbit around sphere
+		light_pivot.rotation.yaw += 0.25 * dt;   // Orbit around sphere
 
 
 
@@ -318,13 +320,11 @@ async function main() {
 		set_uniform_matrix4(gl, program, 'view', view.data);
 		set_uniform_matrix4(gl, program, 'model', model.data);
 
+		// TODO: use light collection for this
 		set_uniform3fv(gl, program, 'sun.direction', [1.0, 1.0, 1.0]);
 		set_uniform3fv(gl, program, 'sun.color', [1.0, 1.0, 1.0]);
-		// set_uniform3fv(gl, program, 'point_light.position', [-5.0, -5.0, -2.0]);
-		// set_uniform3fv(gl, program, 'point_light.color', [1.0, 0.0, 0.0]);
 
 		set_uniform3fv(gl, program, 'cam_pos', Object.values(camera.position));
-
 
 		let jobs: RenderMesh[] = [];
 		generate_render_jobs(Mat4.identity(), root, jobs);
@@ -334,6 +334,7 @@ async function main() {
 			job.mesh.render(gl);
 		}
 
+		// Handle mouse updates in render loop for smooth turning
 		const mouseDelta = controls.get_mouse_delta();
 		if (mouseDelta.x !== 0 || mouseDelta.y !== 0) {
 			camera.add_yaw(mouseDelta.x * MOUSE_SENSITIVITY * dt);

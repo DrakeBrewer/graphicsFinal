@@ -44,25 +44,26 @@ export class LightCollection {
 
 	collect(node: Node, parent_matrix: Mat4) {
 		this.point_lights = [];
-		this.traverse(node, parent_matrix);
+		this.traverse(parent_matrix, node);
 	}
 
-	private traverse(root: Node, parent_matrix: Mat4) {
-		const local_matrix = root.matrix();
-		const world_matrix = parent_matrix.mul(local_matrix);
+	// Basically functions the same as the get_render_jobs function
+	private traverse(parent_matrix: Mat4, node: Node) {
+		const matrix = parent_matrix.mul(node.matrix());
 
-		if (root.light) {
-			root.light.position = {
-				x: world_matrix.data[12]!,
-				y: world_matrix.data[13]!,
-				z: world_matrix.data[14]!
+		if (node.light) {
+			// position indicies in row major matrix
+			node.light.position = {
+				x: matrix.data[3]!,
+				y: matrix.data[7]!,
+				z: matrix.data[11]!
 			};
 
-			this.point_lights.push(root.light);
+			this.point_lights.push(node.light);
 		}
 
-		for (const child of root.children) {
-			this.traverse(child, world_matrix);
+		for (const child of node.children) {
+			this.traverse(matrix, child);
 		}
 	}
 
