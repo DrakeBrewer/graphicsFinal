@@ -189,6 +189,7 @@ async function main() {
 	let building_walls: Node | null = null;
 	let building_floors: Node | null = null;
 	let teapot: Node | null = null;
+	let cow: Node | null = null;
 
 	root.add_child(camera);
 	
@@ -322,6 +323,15 @@ async function main() {
 	});
 	const top_light7 = new Node({ x: 10, y: 5, z: -10 }, undefined, undefined, null, white_light);
 	// museum.add_child(top_light7);
+
+	UvMesh.uv_from_obj_file(gl, '../assets/obj_files/cow.obj', program, blank_mat, (m) => {
+		teapot = new Node(
+			{ x: 22, y: 2, z: -40 },
+			undefined,
+			undefined,
+			m);
+		museum.add_child(teapot);
+	});
 
 	const onResize = () => {
 		canvas.width = window.innerWidth;
