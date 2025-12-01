@@ -50,6 +50,8 @@ const sky_box_indicies = [
 
 ];
 
+
+
 async function main() {
 	const gl = canvas!.getContext('webgl2');
 	if (!gl) {
@@ -118,11 +120,14 @@ async function main() {
 	const texture_map_mat = new Material(gl, '../assets/textures/texture_map.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0);
 	const metal_scale_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const metal_sphere_mat = new Material(gl, '../assets/textures/metal_scale.png', gl.LINEAR_MIPMAP_LINEAR, 0.25, 1.0, 2.0, 4.0)
+	const blank_mat = new Material(gl,'../assets/textures/white.png',gl.LINEAR_MIPMAP_LINEAR,1,1,1,1);
 
 	const height_map = Mesh.from_heightmap(gl, program, hm, 0, 7.6, metal_scale_mat);
-	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4, texture_map_mat);
-	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3, metal_scale_mat);
+	const cube_with_textures_mesh = UvMesh.texture_box(gl, program, 4, 4, 4,{r:1,g:1,b:1,a:1}, texture_map_mat);
+	const cube_with_grant_mesh = UvMesh.box(gl, program, 3, 3, 3,{r:0,g:0,b:255,a:1}, blank_mat);
 	const metal_sphere_mesh = UvMesh.sphere(gl, program, 8, 16, { r: 1, g: 1, b: 1, a: 1 }, metal_sphere_mat);
+	const triangle_mesh = UvMesh.triangle(gl,program,{r:1,g:1,b:1,a:1},5,blank_mat);
+	const rectangle_mesh = UvMesh.rectangle(gl,program,{r:1,g:1,b:1,a:1},5,blank_mat);
 
 	const sun_material = new Material(gl, '../assets/textures/grant.png', gl.LINEAR_MIPMAP_LINEAR, 1.0, 0.0, 2.0, 9.0)
 	const sun_mesh = UvMesh.sphere(
@@ -160,25 +165,41 @@ async function main() {
 
 	const ground = new Node({ x: 0, y: 0, z: 0 }, undefined, undefined, height_map)
 
-	const metal_sphere = new Node({ x: 5, y: 0, z: -10 }, undefined, undefined, metal_sphere_mesh);
+	const metal_sphere = new Node({ x: -9, y: 0, z: -10 }, undefined, undefined, metal_sphere_mesh);
+
+	//const triangle_first = new Node({x:-15,y:0,z:-10},undefined,undefined,triangle_mesh);
+
+	const triangle = new Node({x:0, y:10,z:-10},undefined,undefined,triangle_mesh);
+	triangle.rotation.yaw= Math.PI*2;
+
+	const triangle_anim = new Node({x:0,y:15,z:-10},undefined,undefined,triangle_mesh);
+
+	const rect = new Node({x: -9, y:10,z:-10},undefined,undefined,rectangle_mesh);
+	rect.rotation.yaw = -Math.PI/1.9;
 
 	const sun = new Node({ x: 6, y: 0, z: -10 }, undefined, undefined, sun_mesh);
 	const earth = new Node({ x: 25, y: 2, z: 0 }, undefined, undefined, earth_mesh);
 	const moon = new Node({ x: 10, y: 5, z: 0 }, undefined, undefined, moon_mesh);
+
+	let teapot:Node | null = null;
 
 	root.add_child(camera);
 	root.add_child(ground);
 	root.add_child(texture_cube);
 	root.add_child(grant_cube);
 	root.add_child(metal_sphere);
+	root.add_child(triangle);
+	root.add_child(triangle_anim);
+	root.add_child(rect);
+	//root.add_child(triangle_first);
 
-	// Mesh.from_obj_file(gl,'../assets/obj_files/teapot.obj',program,(m) => {const teapot = new Node(
-	// 		{ x: 10, y: 0, z: -10 },
-	// 		undefined,
-	// 		undefined,
-	// 		m);
-	// 		root.add_child(teapot);}
-	// );
+	UvMesh.uv_from_obj_file(gl,'../assets/obj_files/teapot.obj',program,blank_mat,(m) => {teapot = new Node(
+			{ x: 15, y: 0, z: -10 },
+			undefined,
+			undefined,
+			m);
+			root.add_child(teapot);}
+	);
 
 	root.add_child(sun);
 	sun.add_child(earth);
@@ -202,6 +223,20 @@ async function main() {
 		sun.rotation.yaw += 0.05 * dt;
 		earth.rotation.yaw += 0.5 * dt;
 		moon.rotation.roll += 1.0 * dt;
+
+
+
+		const spin_xy = 0.25; 
+		const spin_xz = 0.5;   
+		const spin_yz = 0.05;   
+
+		triangle_anim.rotation.roll  += spin_xy * dt;
+		triangle_anim.rotation.yaw   += spin_xz * dt;
+		triangle_anim.rotation.pitch += spin_yz * dt;
+
+		if(teapot !== null){
+			teapot.rotation.yaw += spin_xy*dt;
+		}
 
 		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
